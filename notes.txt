@@ -1,0 +1,47 @@
+Clustering k-médias:
+
+Juntar dados em grupos de forma que os pontos estejam próximos entre si. Separar em k grupos usando o centróide do grupo:
+
+centroid = [mean(points, i) for i in 0 .. n - 1] # onde n é a dimensão dos pontos dados
+
+k varia de acordo com a entrada. O objetivo é achar um valor ótimo para k, o que equivale a achar um conjunto ótimo de centróides.
+
+Representação de dados:
+
+Entrada será conjunto de pontos, saída será uma lista de conjunto de pontos.
+
+Simulated Annealing:
+
+Algoritmo usual para clustering:
+
+# Setting up temperatures:
+t_current = t_init = choose_init_temperature()
+t_final = choose_final_temperature()
+t_eq = temperature_equilibrium_point(t_init, t_final)
+f = monotonically_decrease_temperature_function;
+
+# Setting up problem initial configuration:
+clusters = random_init_cluster_config()
+
+while t_current > t_final:
+    while not t_current == t_eq:
+        current_cost = cost(clusters)
+        new_config = disturb(clusters)
+        new_cost = cost(new_config)
+        delta = new_cost - current_cost
+        if delta <= 0:
+            clusters = new_config
+        else
+            clusters = new_config if probability(-delta/t_eq) else clusters
+    t_current = f(t_current)
+
+Precisa definir:
+    -> temperaturas inicial, final e de equilíbrio;
+    -> função de decrescimento monolítico da temperatura;
+    -> criação da configuração inicial dos clusters;
+    -> função de custo;
+    -> função de distúrbio da configuração;
+
+GRASP:
+
+Genetic Algorithms:
