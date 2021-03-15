@@ -1,27 +1,36 @@
 #!/usr/bin/python3
 
-def simulated_annealing(initial_temp, final_temp, temp_var_func, num_iter, clusters):
-    current_temp = initial_temp
-    eq_temp = equilibrium_temp(initial_temp, final_temp)
-    while current_temp > final_temp:
-        while not current_temp == eq_temp:
-            next_state = disturb(clusters)
-            delta = cost(next_state) - cost(clusters)
-            if delta <= 0:
-                clusters = next_state
-            else:
-                clusters = next_state if check_update_state(next_state) else clusters
-        current_temp = temp_var_func(current_temp)
-    return clusters
+import clustering as clt
+import numpy as np
 
-def check_update_state(next_state):
-    return False
+class SAHyperParams:
+    def __init__(self, init_temp : float, final_temp : float, num_iter: int, alpha : int):
+        self._init_temp : float = init_temp
+        self._final_temp : float = final_temp
+        self._num_iter : float = num_iter
+        self._alpha : int = alpha
 
-def equilibrium_temp(initial_temp, final_temp):
-    return 0
+    @property
+    def init_temp(self) -> float:
+        return self._init_temp
+    
+    @property
+    def final_temp(self) -> float:
+        return self._final_temp
+    
+    @property
+    def num_iter(self) -> int:
+        return self._num_iter
+    
+    @property
+    def alpha(self) -> int:
+        return self._alpha
 
-def disturb_state(clusters):
-    return clusters
+def simulated_annealing(hyper_params : SAHyperParams, temp_func : function, clusters : clt.Clusters):
+    current_temp : float = hyper_params.init_temp
+    iterations : int = 0
 
-def cost(clusters):
-    return 0
+    while current_temp > hyper_params.final_temp and iterations < hyper_params.num_iter:
+        current_cost = clusters.sse
+        
+        

@@ -1,9 +1,10 @@
 #!/usr/bin/python3
 
-import clustering as clstr
+import clustering
+
+
 
 # Training the AI:
 
-clstr.say_hello_clustering()
 
 # Testing the AI:
