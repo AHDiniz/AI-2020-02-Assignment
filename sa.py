@@ -36,7 +36,7 @@ def simulated_annealing(hyper_params : HyperParams, temp_func : function, cluste
     iterations : int = 0
 
     # Function that calculates the probability to accept the next state:
-    accept : function = lambda delta: math.exp(-delta / hyper_params.alpha)
+    accept : function = lambda delta: math.exp(-delta / current_temp)
 
     init_time : float = time.time()
     elapsed_time : float = time.time()
