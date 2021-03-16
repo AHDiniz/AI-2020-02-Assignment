@@ -2,6 +2,7 @@
 
 import math
 import random
+import time
 import numpy as np
 
 # Calculating the distance between two points:
@@ -29,6 +30,11 @@ class Clusters:
         points_per_cluster : int = (size / point_dim) / k
         for i in range(0, k):
             np.put(self._clusters, range(i * points_per_cluster, i * points_per_cluster + points_per_cluster - 1), i)
+        
+        # Calculating the initial values of the centroids:
+        self._centroids = list([])
+        for i in range(0, k - 1):
+            self._centroids.add(self.cluster_centroid(i))
     
     # Getting the number of clusters:
     @property
@@ -39,6 +45,24 @@ class Clusters:
     @property
     def clusters(self) -> np.array:
         return self._clusters
+
+    @property
+    def points(self) -> np.array:
+        return self._points_data
+    
+    # Returning the list of centroids of each cluster:
+    def centroids(self) -> list:
+        return self._centroids
+    
+    # Setting the value of the clusters array:
+    @clusters.setter
+    def clusters(self, clusters : np.array):
+        self._clusters = np.copy(clusters)
+    
+    # Setting the value of the centroids list:
+    @centroids.setter
+    def centroids(self, centroids : list):
+        self._centroids = centroids.copy()
     
     # Getting a single point:
     def get_point(self, point_index : int = 0) -> np.array:
@@ -79,3 +103,42 @@ class Clusters:
                 sse += euclidian_dist(point, centroid)
             result += sse
         return result
+
+    # Perturbating a given cluster's centroid:
+    def disturb_cluster_centroid(self, cluster_id : int = 0) -> np.array:
+        cluster = self.centroids[cluster_id]
+        
+        random.seed(time.thread_time_ns())
+
+        delta : float = random.random() / 10
+        G : float = random.gauss(0, np.linalg.norm(cluster))
+
+        for a in cluster:
+            a += delta * G
+
+        return cluster
+
+    # Disturbing the current state to create a possible neighbour:
+    def disturb(self) -> Clusters:
+        # Disturbance will be achieved by perturbating the centroid of a random chosen cluster
+        # And then rearraging the points to the cluster with the closest centroid
+
+        disturbed = Clusters(self._k, self._points_data, self._point_dim)
+        disturbed.clusters = self._clusters
+        disturbed.centroids = self._centroids
+
+        centroid_id : int = random.randint(0, self._k - 1)
+        disturbed.clusters[centroid_id] : np.array = np.copy(disturbed.disturb_cluster_centroid(cluster_id))
+
+        for i in range(0, np.ma.size(disturb.clusters) - 1):
+            point : np.array = disturb.points[i]
+            closest : int = 0
+            dist_closest : float = math.inf
+            for j in range(0, len(disturbed.centroids)):
+                d : float = euclidian_dist(point, disturbed.centroids[i])
+                if (d < dist_closest):
+                    dist_closest = d
+                    closest = j
+            disturbed.move_point(i, closest)
+        
+        return disturbed
