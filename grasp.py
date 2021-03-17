@@ -3,7 +3,6 @@
 import time
 import numpy as np
 import clustering as clt
-import kmeans
 
 class HyperParams:
     def __init__(self, num_iter : int = 0, num_best_solutions : int = 0):
@@ -20,5 +19,9 @@ class HyperParams:
 
 def grasp(hyper_params : HyperParams, clusters : clt.Clusters) -> (clt.Clusters, float):
     
-    
+    iterations : int = 0
+
+    while iterations < hyper_params.num_iter:
+        break
+
     return clusters

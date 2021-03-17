@@ -3,7 +3,6 @@
 import scipy
 import clustering as clt
 import datasets as ds
-import kmeans
 import sa
 import grasp
 import genetic
