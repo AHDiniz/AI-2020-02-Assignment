@@ -23,7 +23,7 @@ Return table with best config by method by mean and by ranking
 '''
 
 class TrainingResult:
-    def __init__(self, name, avg_sse_list, sse_list, avg_elapsed_list, elapsed_list, z_scores, hyper_param_list):
+    def __init__(self, name, avg_sse_list, sse_list, avg_elapsed_list, elapsed_list, z_scores, hyper_param_list, std_list):
         self._method_name : str = name
         self._avg_sse_list : list = avg_sse_list.copy()
         self._sse_list : list = sse_list.copy()
@@ -31,30 +31,97 @@ class TrainingResult:
         self._elapsed_list : list = elapsed_list.copy()
         self._z_scores : np.array = np.copy(z_scores)
         self._hyper_param_list : list = hyper_param_list.copy()
+        self._std_list : list = std_list.copy()
     
+    # Name of the method used as metaheuristic:
     @property
     def method_name(self) -> str:
         return self._method_name
     
+    # List of each configuration avarage sse:
     @property
     def avg_sse_list(self) -> list:
         return self._avg_sse_list
     
+    # List of sse's:
     @property
     def sse_list(self) -> list:
         return self._sse_list
     
+    # List of each configuration avarage elapsed time:
     @property
     def avg_elapsed_list(self) -> list:
         return self._avg_elapsed_list
     
+    # List of elapsed times:
     @property
     def elapsed_list(self) -> list:
         return self._elapsed_list
     
+    # Returning the list of hyperparameter configurations:
     @property
-    def hyper_param_list(self) -> list:
+    def hyper_param_list(self):
         return self._hyper_param_list
+    
+    # Returning hyperparameter configuration with the best avarage elapsed time:
+    @property
+    def best_config_time(self):
+        return hyper_param_list[self._avg_elapsed_list.index(min(self._avg_elapsed_list))]
+    
+    # Returing hyperparameter configuration with the best zscore:
+    @property
+    def best_config_zscore(self):
+        return hyper_param_list[np.where(self._z_scores == np.amin(self._z_scores))]
+    
+    # Returning the metaheuristic's avarage score:
+    @property
+    def avarage_zscore(self):
+        return np.mean(self._z_scores)
+
+    # Getting the five best configurations regarding avarage elapsed time:
+    @property
+    def best_five_config_time(self) -> list:
+        best_configs : list = []
+        best_indeces : list = []
+
+        for i in range(5):
+            min_time : float = np.inf
+            min_index : int = 0
+            config = None
+
+            for j in range(len(hyper_param_list)):
+                if self._avg_elapsed_list[j] < min_time and not j in best_indeces:
+                    min_index = j
+                    min_time = self._avg_elapsed_list[j]
+                    config = hyper_param_list[j]
+            
+            best_configs.add(config)
+            best_indeces.add(min_index)
+        
+        return best_configs
+    
+    # Getting the five best configurations regarding avarage sse:
+    @property
+    def best_five_config_sse(self) -> list:
+        best_configs : list = []
+        best_indeces : list = []
+
+        for i in range(5):
+            min_time : float = np.inf
+            min_index : int = 0
+            config = None
+
+            for j in range(len(hyper_param_list)):
+                if self._avg_sse_list[j] < min_time and not j in best_indeces:
+                    min_index = j
+                    min_time = self._avg_sse_list[j]
+                    config = hyper_param_list[j]
+            
+            best_configs.add(config)
+            best_indeces.add(min_index)
+        
+        return best_configs
+
 
 def training(problems : dict) -> dict:
     results : dict = {}
@@ -65,17 +132,20 @@ def training(problems : dict) -> dict:
         sa_result = train_sa(sa_hyper_params_list)
 
         grasp_hyper_params_list = problem['training']['grasp']
+        grasp_result = train_grasp(grasp_hyper_params_list)
+
         genetic_hyper_params_list = problem['training']['genetic']
-        kmeans_hyper_params_list = problem['training']['kmeans']
+        genetic_result = train_genetic(genetic_hyper_params_list)
 
-
+        results[problem_name] = {'sa': sa_result, 'grasp': grasp_result, 'genetic': genetic_result}
 
     return results
 
-def train_sa(hyper_param_list: list) -> list:
+def train_sa(hyper_param_list: list) -> TrainingResult:
 
     avarage_sse_list : list = []
-    sse_list : list = []
+    sse_lists : list = []
+    std_list : list = []
 
     avarage_elapsed_list : list = []
     elapsed_list : list = []
@@ -89,6 +159,7 @@ def train_sa(hyper_param_list: list) -> list:
         
         avarage_sse : float = 0
         avarage_elapsed : float = 0
+        sse_list : list = []
 
         for i in range(0, 9):
             (result, elapsed_time) = sa.simulated_annealing(hyper_params, temp_func, clusters)
@@ -97,11 +168,88 @@ def train_sa(hyper_param_list: list) -> list:
             avarage_sse += result.sse
             avarage_elapsed += elapsed_time
         
+        std_list.add(np.std(sse_list))
+        
+        sse_lists.add(sse_list)
         avarage_sse_list.add(avarage_sse / 10)
         avarage_elapsed_list.add(avarage_elapsed / 10)
 
     z_scores : np.array = scipy.stats.zscore(avarage_sse_list)
 
-    result : TrainingResult = TrainingResult(avarage_sse_list, sse_list, avarage_elapsed_list, elapsed_list, z_scores, hyper_param_list)
+    result : TrainingResult = TrainingResult(avarage_sse_list, sse_list, avarage_elapsed_list, elapsed_list, z_scores, hyper_param_list, std_list)
+
+    return result
+
+def train_grasp(hyper_param_list : list) -> TrainingResult:
+
+    avarage_sse_list : list = []
+    sse_lists : list = []
+    std_list : list = []
+
+    avarage_elapsed_list : list = []
+    elapsed_list : list = []
+
+    for config in hyper_param_list:
+        k : int = config.k
+        clusters : clt.Clusters = clt.Clusters(k, config.data_set)
+        hyper_params : grasp.HyperParams = config.grasp_hyper_params
+        
+        avarage_sse : float = 0
+        avarage_elapsed : float = 0
+        sse_list : list = []
+
+        for i in range(0, 9):
+            (result, elapsed_time) = grasp.grasp(hyper_params, clusters)
+            sse_list.add(result.sse)
+            elapsed_list.add(elapsed_time)
+            avarage_sse += result.sse
+            avarage_elapsed += elapsed_time
+        
+        std_list.add(np.std(sse_list))
+        
+        sse_lists.add(sse_list)
+        avarage_sse_list.add(avarage_sse / 10)
+        avarage_elapsed_list.add(avarage_elapsed / 10)
+
+    z_scores : np.array = scipy.stats.zscore(avarage_sse_list)
+
+    result : TrainingResult = TrainingResult(avarage_sse_list, sse_list, avarage_elapsed_list, elapsed_list, z_scores, hyper_param_list, std_list)
+
+    return result
+
+def train_genetic(hyper_param_list : list) -> TrainingResult:
+
+    avarage_sse_list : list = []
+    sse_lists : list = []
+    std_list : list = []
+
+    avarage_elapsed_list : list = []
+    elapsed_list : list = []
+
+    for config in hyper_param_list:
+        k : int = config.k
+        clusters : clt.Clusters = clt.Clusters(k, config.data_set)
+        hyper_params : genetic.HyperParams = config.genetic_hyper_params
+        
+        avarage_sse : float = 0
+        avarage_elapsed : float = 0
+        sse_list : list = []
+
+        for i in range(0, 9):
+            (result, elapsed_time) = genetic.genetic(hyper_params, clusters)
+            sse_list.add(result.sse)
+            elapsed_list.add(elapsed_time)
+            avarage_sse += result.sse
+            avarage_elapsed += elapsed_time
+        
+        std_list.add(np.std(sse_list))
+        
+        sse_lists.add(sse_list)
+        avarage_sse_list.add(avarage_sse / 10)
+        avarage_elapsed_list.add(avarage_elapsed / 10)
+
+    z_scores : np.array = scipy.stats.zscore(avarage_sse_list)
+
+    result : TrainingResult = TrainingResult(avarage_sse_list, sse_list, avarage_elapsed_list, elapsed_list, z_scores, hyper_param_list, std_list)
 
     return result

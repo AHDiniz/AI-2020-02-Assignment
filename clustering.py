@@ -142,3 +142,32 @@ class Clusters:
             disturbed.move_point(i, closest)
         
         return disturbed
+
+    # Getting the point that is closest to the center of the points set:
+    def center_point(self) -> np.array:
+        center : np.array = np.zeros(self._point_dim)
+        result : np.array = np.zeros(self._point_dim)
+        num_points : int = points.shape[0]
+
+        for point in self._points_data:
+            center += point / num_points
+
+        min_dist : float = np.inf
+
+        for point in self._points_data:
+            d : float = euclidian_dist(point, center)
+            if d < min_dist:
+                result = point.copy()
+                min_dist = d
+
+        return result
+
+
+    # Applying the Kaufman initialization algorithm to create a state to be compared in the GRASP implementation:
+    def kaufman_init(self) -> Clusters:
+        kaufman : Clusters = Clusters(self._k, self._points_data, self._point_dim)
+
+        # Choosing the point that is closest to the center of the whole set of points:
+        center_point : np.array = kaufman.center_point()
+
+        return kaufman
