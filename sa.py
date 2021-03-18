@@ -33,7 +33,6 @@ class HyperParams:
 # Metaheuristic implementation:
 def simulated_annealing(hyper_params : HyperParams, temp_func, clusters : clt.Clusters) -> (clt.Clusters, float):
     current_temp : float = hyper_params.init_temp
-    iterations : int = 0
 
     # Function that calculates the probability to accept the next state:
     accept = lambda delta: math.exp(-delta / current_temp)
@@ -41,18 +40,29 @@ def simulated_annealing(hyper_params : HyperParams, temp_func, clusters : clt.Cl
     init_time : float = time.time()
     elapsed_time : float = time.time()
 
-    while current_temp > hyper_params.final_temp and iterations < hyper_params.num_iter:
-        current_cost : float = clusters.sse
+    clusters.initialize_state()
+
+    while current_temp > hyper_params.final_temp: 
         
-        # Disturbing the state:
-        disturbed : clt.Clusters = clusters.disturb()
-        disturbed_cost : float = disturbed.sse
+        iterations : int = 0
+        while iterations < hyper_params.num_iter:
+            current_cost : float = clusters.sse
+            
+            # Disturbing the state:
+            disturbed : clt.Clusters = clusters.disturb()
+            disturbed_cost : float = disturbed.sse
 
-        # Comparing the costs of the current state and the disturbed state:
-        delta : float = disturbed_cost - current_cost
+            # Comparing the costs of the current state and the disturbed state:
+            delta : float = disturbed_cost - current_cost
 
-        if delta <= 0 or random.random() >= accept(delta):
-            clusters = disturbed
+            if delta < 0 or random.random() >= accept(delta):
+                clusters = disturbed
+
+            iterations += 1
+            elapsed_time = time.time()
+
+            if elapsed_time - init_time >= 1:
+                break
 
         current_temp = temp_func(current_temp) # Updating the temperature
 
@@ -61,4 +71,4 @@ def simulated_annealing(hyper_params : HyperParams, temp_func, clusters : clt.Cl
         if elapsed_time - init_time >= 1:
             break
     
-    return (clusters, elapsed_time)
+    return (clusters, elapsed_time - init_time)

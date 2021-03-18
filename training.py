@@ -152,6 +152,12 @@ def train_sa(hyper_param_list: list) -> TrainingResult:
     elapsed_list : list = []
 
     for config in hyper_param_list:
+        print("Creating a new clustering problem instance:")
+        print("\tk =", config.k)
+        print("\talpha =", config.sa_hyper_params.alpha)
+        print("\tinitial temperature =", config.sa_hyper_params.init_temp)
+        print("\tnumber of iterations =", config.sa_hyper_params.num_iter)
+
         k : int = config.k
         clusters : clt.Clusters = clt.Clusters(k, config.data_set, config.point_dim)
         hyper_params : sa.HyperParams = config.sa_hyper_params
@@ -174,6 +180,9 @@ def train_sa(hyper_param_list: list) -> TrainingResult:
         sse_lists.append(sse_list)
         avarage_sse_list.append(avarage_sse / 10)
         avarage_elapsed_list.append(avarage_elapsed / 10)
+
+        print("\tAvarage Result =", avarage_sse / 10)
+        print("\tAvarage Elapsed time=", avarage_elapsed / 10)
 
     z_scores : np.array = sp.stats.zscore(avarage_sse_list)
 

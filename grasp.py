@@ -11,11 +11,11 @@ class HyperParams:
     
     @property
     def num_iter(self) -> int:
-        return num_iter
+        return self._num_iter
     
     @property
     def num_best_solutions(self) -> int:
-        return num_best_solutions
+        return self._num_best_solutions
 
 def grasp(hyper_params : HyperParams, clusters : clt.Clusters) -> (clt.Clusters, float):
     
