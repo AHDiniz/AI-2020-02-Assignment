@@ -31,7 +31,7 @@ class Clusters:
         
         # Calculating the initial values of the centroids:
         self._centroids = list([])
-        for i in range(0, k - 1):
+        for i in range(0, k):
             self._centroids.append(self.cluster_centroid(i))
     
     # Getting the number of clusters:
@@ -52,6 +52,11 @@ class Clusters:
     @property
     def centroids(self) -> list:
         return self._centroids
+    
+    # Returning the number of points in the set:
+    @property
+    def num_points(self) -> int:
+        return self._num_points
     
     # Setting the value of the clusters array:
     def clusters(self, clusters : np.array):
@@ -91,11 +96,12 @@ class Clusters:
         # Getting the points that are inside the target cluster:
         points : np.array = self.get_points_in_cluster(cluster_id)
         num_points : int = points.shape[0]
+        print(points[0])
+        print(centroid)
 
         # Calculating the centroid coordinates:
         for point in points:
             centroid += point / num_points
-            #print(point)
         
         return centroid
     
@@ -131,19 +137,19 @@ class Clusters:
         # Disturbance will be achieved by perturbating the centroid of a random chosen cluster
         # And then rearraging the points to the cluster with the closest centroid
 
-        disturbed = Clusters(self._k, self._points_data, self._point_dim)
+        disturbed = Clusters(self._k, self._points_data, self._point_dim[1])
         disturbed.clusters = self._clusters
         disturbed.centroids = self._centroids
 
         centroid_id : int = random.randint(0, self._k - 1)
         disturbed.centroids[centroid_id] : np.array = np.copy(disturbed.disturb_cluster_centroid(centroid_id))
 
-        for i in range(0, np.ma.size(disturbed.clusters) - 1):
+        for i in range(0, disturbed.num_points):
             point : np.array = disturbed.points[i]
             closest : int = 0
             dist_closest : float = math.inf
-            for j in range(0, len(disturbed.centroids) - 1):
-                d : float = euclidian_dist(point, disturbed.centroids[i])
+            for j in range(0, disturbed.k):
+                d : float = euclidian_dist(point, disturbed.centroids[j])
                 if (d < dist_closest):
                     dist_closest = d
                     closest = j
