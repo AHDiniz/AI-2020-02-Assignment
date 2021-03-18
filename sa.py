@@ -31,12 +31,12 @@ class HyperParams:
         return self._alpha
 
 # Metaheuristic implementation:
-def simulated_annealing(hyper_params : HyperParams, temp_func : function, clusters : clt.Clusters) -> (clt.Clusters, float):
+def simulated_annealing(hyper_params : HyperParams, temp_func, clusters : clt.Clusters) -> (clt.Clusters, float):
     current_temp : float = hyper_params.init_temp
     iterations : int = 0
 
     # Function that calculates the probability to accept the next state:
-    accept : function = lambda delta: math.exp(-delta / current_temp)
+    accept = lambda delta: math.exp(-delta / current_temp)
 
     init_time : float = time.time()
     elapsed_time : float = time.time()

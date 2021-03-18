@@ -122,11 +122,10 @@ class TrainingResult:
         
         return best_configs
 
-
 def training(problems : dict) -> dict:
     results : dict = {}
 
-    for problem_name, problem in problems:
+    for problem_name, problem in problems.items():
         
         sa_hyper_params_list = problem['training']['sa']
         sa_result = train_sa(sa_hyper_params_list)
@@ -152,7 +151,7 @@ def train_sa(hyper_param_list: list) -> TrainingResult:
 
     for config in hyper_param_list:
         k : int = config.k
-        clusters : clt.Clusters = clt.Clusters(k, config.data_set)
+        clusters : clt.Clusters = clt.Clusters(k, config.data_set, config.point_dim)
         hyper_params : sa.HyperParams = config.sa_hyper_params
         alpha : float = config.sa_hyper_params.alpha
         temp_func : function = lambda x : x - alpha
