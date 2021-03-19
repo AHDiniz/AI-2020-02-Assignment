@@ -3,6 +3,7 @@
 import math
 import random
 import time
+import copy
 import numpy as np
 
 # Calculating the distance between two points:
@@ -43,35 +44,31 @@ class Clusters:
             self._centroids[i] = self.cluster_centroid(i)
 
     # Getting the number of clusters:
-    @property
-    def k(self) -> int:
+    def get_k(self) -> int:
         return self._k
     
     # Returning the cluster identifier of each point:
-    @property
-    def clusters(self) -> np.array:
+    def get_clusters(self) -> np.array:
         return self._clusters
 
-    @property
-    def points(self) -> np.array:
+    # Returning the points data in the clusters:
+    def get_points(self) -> np.array:
         return self._points_data
     
     # Returning the list of centroids of each cluster:
-    @property
-    def centroids(self) -> list:
+    def get_centroids(self) -> list:
         return self._centroids
     
     # Returning the number of points in the set:
-    @property
-    def num_points(self) -> int:
+    def get_num_points(self) -> int:
         return self._num_points
     
     # Setting the value of the clusters array:
-    def clusters(self, clusters : np.array):
+    def set_clusters(self, clusters : np.array):
         self._clusters = np.copy(clusters)
     
     # Setting the value of the centroids list:
-    def centroids(self, centroids : list):
+    def set_centroids(self, centroids : list):
         self._centroids = centroids.copy()
     
     # Getting a single point:
@@ -80,18 +77,9 @@ class Clusters:
     
     # Getting array of points that are in a given cluster:
     def get_points_in_cluster(self, cluster : int = 0) -> np.array:
-        result = []
-        indices = []
-
-        for i in range(0, np.size(self._clusters)):
-            if self._clusters[i] == cluster:
-                indices.append(i)
-
-        for i in range(int(self._num_points)):
-            if i in indices:
-                result.append(self._points_data[i])
-
-        return np.array(result)
+        indices : np.array = np.where(self.clusters == cluster)[0]
+        result : np.array = np.take(self.points, indices, axis=0)
+        return result
     
     # Changing the cluster of a given point:
     def move_point(self, point_index : int = 0, cluster_id : int = 0):
@@ -112,8 +100,7 @@ class Clusters:
         return centroid
     
     # Calcuting the sum of squares of euclidian distances:
-    @property
-    def sse(self) -> float:
+    def get_sse(self) -> float:
         result = 0
         for c in range(0, self._k - 1):
             points : np.array = self.get_points_in_cluster(c)
@@ -124,46 +111,26 @@ class Clusters:
             result += sse
         return result
 
-    # Perturbating a given cluster's centroid:
-    def disturb_cluster_centroid(self, cluster_id : int = 0) -> np.array:
-        centroid : np.array = np.copy(self._centroids[cluster_id])
-
-        delta : float = random.random() / 10
-        G : float = random.gauss(0, np.linalg.norm(centroid))
-
-        for a in centroid:
-            a += delta * G
-
-        return centroid
+    # Getting the point in point_set that is furthest from c
+    def furthest_in_set(self, point_set : np.array, c : np.array) -> np.array:
+        f = lambda p : euclidian_dist(p, c)
+        return (np.apply_along_axis(f, 1, point_set)).argmax()
 
     # Disturbing the current state to create a possible neighbour:
     def disturb(self):
-        # Disturbance will be achieved by perturbating the centroid of a random chosen cluster
-        # And then rearraging the points to the cluster with the closest centroid
+        # Disturbance will be achieved by selecting a random cluster and removing the furthest point to the cluster with closest centroid
 
         disturbed = Clusters(self._k, self._points_data, self._point_dim[1])
-        disturbed.clusters = np.zeros(self._num_points)
-        for i in range(self._num_points):
-            disturbed.clusters[i] = self._clusters[i]
-        disturbed.centroids = list([])
-        for i in range(self._k):
-            disturbed.centroids.append(np.zeros(self._point_dim[1]))
-        for i in range(self._k):
-            for j in range(self._point_dim[1]):
-                disturbed.centroids[i][j] = self._centroids[i][j]
+        disturbed.clusters = copy.deepcopy(self._clusters)
+        disturbed.centroids = copy.deepcopy(self._centroids)
 
-        centroid_id : int = random.randint(0, disturbed.k - 1)
-        disturbed.centroids[centroid_id] : np.array = np.copy(disturbed.disturb_cluster_centroid(centroid_id))
+        disturbed.clusters[random.randint(0, disturbed.num_points - 1)] = random.randint(0, disturbed.k - 1)
 
-        for i in range(0, disturbed.num_points):
-            point : np.array = disturbed.points[i]
-            closest : int = 0
-            dist_closest : float = math.inf
-            for j in range(0, disturbed.k):
-                d : float = euclidian_dist(point, disturbed.centroids[j])
-                if (d < dist_closest):
-                    dist_closest = d
-                    closest = j
-            disturbed.move_point(i, closest)
-        
         return disturbed
+
+    k = property(get_k)
+    points = property(get_points)
+    num_points = property(get_num_points)
+    sse = property(get_sse)
+    clusters = property(get_clusters, set_clusters)
+    centroids = property(get_centroids, set_centroids)

@@ -31,19 +31,17 @@ class HyperParams:
         return self._alpha
 
 # Metaheuristic implementation:
-def simulated_annealing(hyper_params : HyperParams, temp_func, clusters : clt.Clusters) -> (clt.Clusters, float):
+def simulated_annealing(hyper_params : HyperParams, clusters : clt.Clusters) -> (clt.Clusters, float):
+
     current_temp : float = hyper_params.init_temp
-
-    # Function that calculates the probability to accept the next state:
-    accept = lambda delta: math.exp(-delta / current_temp)
-
+    
     init_time : float = time.time()
     elapsed_time : float = time.time()
 
     clusters.initialize_state()
 
-    while current_temp > hyper_params.final_temp: 
-        
+    while current_temp > hyper_params.final_temp:
+
         iterations : int = 0
         while iterations < hyper_params.num_iter:
             current_cost : float = clusters.sse
@@ -55,7 +53,7 @@ def simulated_annealing(hyper_params : HyperParams, temp_func, clusters : clt.Cl
             # Comparing the costs of the current state and the disturbed state:
             delta : float = disturbed_cost - current_cost
 
-            if delta < 0 or random.random() >= accept(delta):
+            if delta < 0 or random.random() >= math.exp(-delta / current_temp):
                 clusters = disturbed
 
             iterations += 1
@@ -64,11 +62,12 @@ def simulated_annealing(hyper_params : HyperParams, temp_func, clusters : clt.Cl
             if elapsed_time - init_time >= 1:
                 break
 
-        current_temp = temp_func(current_temp) # Updating the temperature
+        # Updating the temperature:
+        current_temp *= hyper_params.alpha
+        print("Current temperature =", current_temp)
 
         elapsed_time = time.time()
 
         if elapsed_time - init_time >= 1:
             break
-    
     return (clusters, elapsed_time - init_time)

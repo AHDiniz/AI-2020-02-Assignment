@@ -161,15 +161,13 @@ def train_sa(hyper_param_list: list) -> TrainingResult:
         k : int = config.k
         clusters : clt.Clusters = clt.Clusters(k, config.data_set, config.point_dim)
         hyper_params : sa.HyperParams = config.sa_hyper_params
-        alpha : float = config.sa_hyper_params.alpha
-        temp_func : function = lambda x : x - alpha
         
         avarage_sse : float = 0
         avarage_elapsed : float = 0
         sse_list : list = []
 
         for i in range(0, 9):
-            (result, elapsed_time) = sa.simulated_annealing(hyper_params, temp_func, clusters)
+            (result, elapsed_time) = sa.simulated_annealing(hyper_params, clusters)
             sse_list.append(result.sse)
             elapsed_list.append(elapsed_time)
             avarage_sse += result.sse
