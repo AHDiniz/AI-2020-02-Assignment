@@ -23,6 +23,9 @@ class Clusters:
         self._points_data = np.array(data)
         self._num_points : int = self._points_data.shape[0]
 
+        # Creating a random seed:
+        random.seed(time.thread_time_ns())
+
         # Initializing the data arrays:
         self._clusters : np.array = np.zeros(self._num_points)
         self._centroids = list([])
@@ -32,12 +35,12 @@ class Clusters:
     # Initializing the state of the clusters:
     def initialize_state(self):
         # Setting up the lists of points index set:
-        for c in self._clusters:
-            c = random.randint(0, self._k - 1)
+        for i in range(self._num_points):
+            self._clusters[i] = random.randint(0, self._k - 1)
         
         # Calculating the initial values of the centroids:
-        for i in range(0, self._k):
-            self._centroids.append(self.cluster_centroid(i))
+        for i in range(self._k):
+            self._centroids[i] = self.cluster_centroid(i)
 
     # Getting the number of clusters:
     @property
@@ -124,8 +127,6 @@ class Clusters:
     # Perturbating a given cluster's centroid:
     def disturb_cluster_centroid(self, cluster_id : int = 0) -> np.array:
         centroid : np.array = np.copy(self._centroids[cluster_id])
-        
-        random.seed(time.thread_time_ns())
 
         delta : float = random.random() / 10
         G : float = random.gauss(0, np.linalg.norm(centroid))
@@ -141,10 +142,15 @@ class Clusters:
         # And then rearraging the points to the cluster with the closest centroid
 
         disturbed = Clusters(self._k, self._points_data, self._point_dim[1])
-        disturbed.clusters = np.copy(self._clusters)
+        disturbed.clusters = np.zeros(self._num_points)
+        for i in range(self._num_points):
+            disturbed.clusters[i] = self._clusters[i]
         disturbed.centroids = list([])
-        for c in self._centroids:
-            disturbed.centroids.append(np.copy(c))
+        for i in range(self._k):
+            disturbed.centroids.append(np.zeros(self._point_dim[1]))
+        for i in range(self._k):
+            for j in range(self._point_dim[1]):
+                disturbed.centroids[i][j] = self._centroids[i][j]
 
         centroid_id : int = random.randint(0, disturbed.k - 1)
         disturbed.centroids[centroid_id] : np.array = np.copy(disturbed.disturb_cluster_centroid(centroid_id))
