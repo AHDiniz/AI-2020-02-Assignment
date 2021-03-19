@@ -152,14 +152,7 @@ def train_sa(hyper_param_list: list) -> TrainingResult:
     elapsed_list : list = []
 
     for config in hyper_param_list:
-        print("Creating a new clustering problem instance:")
-        print("\tk =", config.k)
-        print("\talpha =", config.sa_hyper_params.alpha)
-        print("\tinitial temperature =", config.sa_hyper_params.init_temp)
-        print("\tnumber of iterations =", config.sa_hyper_params.num_iter)
-
         k : int = config.k
-        clusters : clt.Clusters = clt.Clusters(k, config.data_set, config.point_dim)
         hyper_params : sa.HyperParams = config.sa_hyper_params
         
         avarage_sse : float = 0
@@ -167,10 +160,11 @@ def train_sa(hyper_param_list: list) -> TrainingResult:
         sse_list : list = []
 
         for i in range(0, 9):
+            clusters : clt.Clusters = clt.Clusters(k, config.data_set, config.point_dim)
             (result, elapsed_time) = sa.simulated_annealing(hyper_params, clusters)
-            sse_list.append(result.sse)
+            sse_list.append(result)
             elapsed_list.append(elapsed_time)
-            avarage_sse += result.sse
+            avarage_sse += result
             avarage_elapsed += elapsed_time
         
         std_list.append(np.std(sse_list))
@@ -179,8 +173,8 @@ def train_sa(hyper_param_list: list) -> TrainingResult:
         avarage_sse_list.append(avarage_sse / 10)
         avarage_elapsed_list.append(avarage_elapsed / 10)
 
-        print("\tAvarage Result =", avarage_sse / 10)
-        print("\tAvarage Elapsed time=", avarage_elapsed / 10)
+        #if avarage_sse / 10 < 1000:
+        print("Avarage Result =", avarage_sse / 10)
 
     z_scores : np.array = sp.stats.zscore(avarage_sse_list)
 
@@ -208,9 +202,9 @@ def train_grasp(hyper_param_list : list) -> TrainingResult:
 
         for i in range(0, 9):
             (result, elapsed_time) = grasp.grasp(hyper_params, clusters)
-            sse_list.add(result.sse)
+            sse_list.add(result)
             elapsed_list.add(elapsed_time)
-            avarage_sse += result.sse
+            avarage_sse += result
             avarage_elapsed += elapsed_time
         
         std_list.add(np.std(sse_list))

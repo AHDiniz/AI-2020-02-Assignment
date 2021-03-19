@@ -31,7 +31,7 @@ class HyperParams:
         return self._alpha
 
 # Metaheuristic implementation:
-def simulated_annealing(hyper_params : HyperParams, clusters : clt.Clusters) -> (clt.Clusters, float):
+def simulated_annealing(hyper_params : HyperParams, clusters : clt.Clusters) -> (float, float):
 
     current_temp : float = hyper_params.init_temp
     
@@ -39,22 +39,25 @@ def simulated_annealing(hyper_params : HyperParams, clusters : clt.Clusters) -> 
     elapsed_time : float = time.time()
 
     clusters.initialize_state()
+    smallest : float = np.inf
 
     while current_temp > hyper_params.final_temp:
 
         iterations : int = 0
         while iterations < hyper_params.num_iter:
-            current_cost : float = clusters.sse
-            
+
             # Disturbing the state:
-            disturbed : clt.Clusters = clusters.disturb()
-            disturbed_cost : float = disturbed.sse
+            clusters.disturb()
 
             # Comparing the costs of the current state and the disturbed state:
-            delta : float = disturbed_cost - current_cost
+            delta : float = clusters.disturbed_sse - clusters.sse
 
-            if delta < 0 or random.random() >= math.exp(-delta / current_temp):
-                clusters = disturbed
+            if delta <= 0:
+                if clusters.disturbed_sse < smallest:
+                    smallest = clusters.disturbed_sse
+                clusters.accept_disturbed()
+            elif random.random() <= math.exp(-delta / current_temp):
+                clusters.accept_disturbed()
 
             iterations += 1
             elapsed_time = time.time()
@@ -64,10 +67,10 @@ def simulated_annealing(hyper_params : HyperParams, clusters : clt.Clusters) -> 
 
         # Updating the temperature:
         current_temp *= hyper_params.alpha
-        print("Current temperature =", current_temp)
 
         elapsed_time = time.time()
 
         if elapsed_time - init_time >= 1:
             break
-    return (clusters, elapsed_time - init_time)
+
+    return (clusters.sse, elapsed_time - init_time)
