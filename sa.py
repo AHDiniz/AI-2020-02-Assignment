@@ -39,7 +39,7 @@ def simulated_annealing(hyper_params : HyperParams, clusters : clt.Clusters) -> 
     elapsed_time : float = time.time()
 
     clusters.initialize_state()
-    smallest : float = np.inf
+    smallest : float = clusters.sse
 
     while current_temp > hyper_params.final_temp:
 
@@ -56,7 +56,7 @@ def simulated_annealing(hyper_params : HyperParams, clusters : clt.Clusters) -> 
                 if clusters.disturbed_sse < smallest:
                     smallest = clusters.disturbed_sse
                 clusters.accept_disturbed()
-            elif random.random() <= math.exp(-delta / current_temp):
+            elif random.random() < math.exp(-delta / current_temp):
                 clusters.accept_disturbed()
 
             iterations += 1
@@ -73,4 +73,4 @@ def simulated_annealing(hyper_params : HyperParams, clusters : clt.Clusters) -> 
         if elapsed_time - init_time >= 1:
             break
 
-    return (clusters.sse, elapsed_time - init_time)
+    return (smallest, elapsed_time - init_time)

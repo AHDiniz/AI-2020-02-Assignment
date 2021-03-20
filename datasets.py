@@ -2,6 +2,7 @@
 
 import numpy as np
 import seaborn as sns
+from sklearn import datasets
 import sa as sa
 import grasp as grasp
 import genetic as genetic
@@ -119,5 +120,42 @@ def load_problems() -> dict:
             p.set_genetic_hyper_params(genetic_hps)
             problems['iris']['testing']['genetic'].append(p)
         problems['iris']['testing']['kmeans'].append(Problem("kmeans", iris_points_data, k, 4))
+
+    # Creating clustering data for the wine data set:
+    wine_ks_training : list = [2,6,9,11,13]
+    wine_ks_test : list = [3,5,13,15,20,23,25,30,41,45]
+
+    wine_ds = datasets.load_wine()
+    wine_points_data : np.array = wine_ds['data']
+
+    for k in wine_ks_training:
+        for sa_hps in sa_hyper_params:
+            p = Problem("sa", wine_points_data, k, 4)
+            p.set_sa_hyper_params(sa_hps)
+            problems['wine']['training']['sa'].append(p)
+        for grasp_hps in grasp_hyper_params:
+            p = Problem("grasp", wine_points_data, k, 4)
+            p.set_grasp_hyper_params(grasp_hps)
+            problems['wine']['training']['grasp'].append(p)
+        for genetic_hps in genetic_hyper_params:
+            p = Problem("genetic", iris_points_data, k, 4)
+            p.set_genetic_hyper_params(genetic_hps)
+            problems['wine']['training']['genetic'].append(p)
+        problems['wine']['training']['kmeans'].append(Problem("kmeans", wine_points_data, k, 4))
+    
+    for k in wine_ks_test:
+        for sa_hps in sa_hyper_params:
+            p = Problem("sa", iris_points_data, k, 4)
+            p.set_sa_hyper_params(sa_hps)
+            problems['wine']['testing']['sa'].append(p)
+        for grasp_hps in grasp_hyper_params:
+            p = Problem("grasp", wine_points_data, k, 4)
+            p.set_grasp_hyper_params(grasp_hps)
+            problems['wine']['testing']['grasp'].append(p)
+        for genetic_hps in genetic_hyper_params:
+            p = Problem("genetic", wine_points_data, k, 4)
+            p.set_genetic_hyper_params(genetic_hps)
+            problems['wine']['testing']['genetic'].append(p)
+        problems['wine']['testing']['kmeans'].append(Problem("kmeans", wine_points_data, k, 4))
 
     return problems

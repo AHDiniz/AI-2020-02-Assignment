@@ -95,7 +95,7 @@ class Clusters:
     # Getting array of points that are in a given cluster:
     def get_points_in_cluster(self, cluster : int, clusters : np.array) -> np.array:
         indices : np.array = np.where(clusters == cluster)[0]
-        result : np.array = np.take(self.points, indices, axis=0)
+        result : np.array = np.take(self.points, indices)
         return result
     
     # Getting the number of points in a given cluster:
@@ -117,9 +117,9 @@ class Clusters:
 
         # Calculating the centroid coordinates:
         for point in points:
-            centroid += point
+            centroid += point / num_points
         
-        return centroid / num_points
+        return centroid
     
     # Getting the sum of squares of euclidian distances in the regular state:
     def get_sse(self) -> float:
@@ -164,7 +164,9 @@ class Clusters:
     def disturb(self):
         # Disturbance will be achieved by selecting a random cluster and removing the furthest point to the cluster with closest centroid
         c : int = random.randint(0, self._k - 1)
-        new_c : int = random.randint(0, self._k - 1)
+        new_c : int = c
+        while new_c == c:
+            new_c = random.randint(0, self._k - 1)
         index : int = random.randint(0, self._num_points - 1)
         self._disturbed_clusters[index] = new_c
         self._disturbed_centroids[c] = self.cluster_centroid(c, self._clusters)

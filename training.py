@@ -126,6 +126,8 @@ def training(problems : dict) -> dict:
     results : dict = {}
 
     for problem_name, problem in problems.items():
+
+        print("Starting the training procedure with the", problem_name, "dataset.")
         
         sa_hyper_params_list = problem['training']['sa']
         sa_result = train_sa(sa_hyper_params_list)
@@ -173,8 +175,7 @@ def train_sa(hyper_param_list: list) -> TrainingResult:
         avarage_sse_list.append(avarage_sse / 10)
         avarage_elapsed_list.append(avarage_elapsed / 10)
 
-        #if avarage_sse / 10 < 1000:
-        print("Avarage Result =", avarage_sse / 10)
+        print("Avarage result =", avarage_sse / 10)
 
     z_scores : np.array = sp.stats.zscore(avarage_sse_list)
 
@@ -193,7 +194,7 @@ def train_grasp(hyper_param_list : list) -> TrainingResult:
 
     for config in hyper_param_list:
         k : int = config.k
-        clusters : clt.Clusters = clt.Clusters(k, config.data_set)
+        clusters : clt.Clusters = clt.Clusters(k, config.data_set, 13)
         hyper_params : grasp.HyperParams = config.grasp_hyper_params
         
         avarage_sse : float = 0
