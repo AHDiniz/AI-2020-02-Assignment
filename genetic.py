@@ -21,6 +21,12 @@ class HyperParams:
     @property
     def mutation_rate(self) -> float:
         return self._mutation_rate
-    
+
+class Population:
+    def __init__(self, size : int, clusters : clt.Clusters):
+        self._size = size
+        self._instances : list = []
+        self._clusters : clt.Clusters = clusters
+
 def genetic(hyper_params : HyperParams, clusters : clt.Clusters) -> (clt.Clusters, float):
     return (clusters, 0)

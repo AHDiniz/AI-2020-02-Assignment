@@ -26,6 +26,7 @@ def hill_climbing(clusters : clt.Clusters) -> float:
         clusters.disturb()
         if clusters.disturbed_sse < clusters.sse:
             clusters.accept_disturbed()
+        current_time = time.time()
     
     return clusters.sse
 
@@ -37,9 +38,7 @@ def grasp(hyper_params : HyperParams, clusters : clt.Clusters) -> (float, float)
     clusters.initialize_state()
 
     result : float = 0
-    best_solutions : set = {}
-    for i in range(0, hyper_params.num_best_solutions):
-        best_solutions.add(float(i))
+    best_solutions : set = set([])
     solutions_added : int = 0
 
     iterations : int = 0

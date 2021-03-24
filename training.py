@@ -129,8 +129,8 @@ def training(problems : dict) -> dict:
 
         print("Starting the training procedure with the", problem_name, "dataset.")
         
-        sa_hyper_params_list = problem['training']['sa']
-        sa_result = train_sa(sa_hyper_params_list)
+        #sa_hyper_params_list = problem['training']['sa']
+        #sa_result = train_sa(sa_hyper_params_list)
 
         grasp_hyper_params_list = problem['training']['grasp']
         grasp_result = train_grasp(grasp_hyper_params_list)
@@ -138,7 +138,7 @@ def training(problems : dict) -> dict:
         genetic_hyper_params_list = problem['training']['genetic']
         genetic_result = train_genetic(genetic_hyper_params_list)
 
-        results[problem_name] = {'sa': sa_result, 'grasp': grasp_result, 'genetic': genetic_result}
+        results[problem_name] = {'sa': None, 'grasp': grasp_result, 'genetic': genetic_result}
 
     return results
 
@@ -185,6 +185,8 @@ def train_sa(hyper_param_list: list) -> TrainingResult:
 
 def train_grasp(hyper_param_list : list) -> TrainingResult:
 
+    print("Training the GRASP metaheuristic...")
+
     avarage_sse_list : list = []
     sse_lists : list = []
     std_list : list = []
@@ -210,6 +212,8 @@ def train_grasp(hyper_param_list : list) -> TrainingResult:
         
         std_list.add(np.std(sse_list))
         
+        print("Avarage result =", avarage_sse / 10)
+
         sse_lists.add(sse_list)
         avarage_sse_list.add(avarage_sse / 10)
         avarage_elapsed_list.add(avarage_elapsed / 10)
@@ -221,6 +225,8 @@ def train_grasp(hyper_param_list : list) -> TrainingResult:
     return result
 
 def train_genetic(hyper_param_list : list) -> TrainingResult:
+
+    print("Training the Genetic Algorithm metaheuristic...")
 
     avarage_sse_list : list = []
     sse_lists : list = []
@@ -247,6 +253,8 @@ def train_genetic(hyper_param_list : list) -> TrainingResult:
         
         std_list.add(np.std(sse_list))
         
+        print("Avarage result =", avarage_sse / 10)
+
         sse_lists.add(sse_list)
         avarage_sse_list.add(avarage_sse / 10)
         avarage_elapsed_list.add(avarage_elapsed / 10)

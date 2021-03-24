@@ -130,32 +130,32 @@ def load_problems() -> dict:
 
     for k in wine_ks_training:
         for sa_hps in sa_hyper_params:
-            p = Problem("sa", wine_points_data, k, 4)
+            p = Problem("sa", wine_points_data, k, 13)
             p.set_sa_hyper_params(sa_hps)
             problems['wine']['training']['sa'].append(p)
         for grasp_hps in grasp_hyper_params:
-            p = Problem("grasp", wine_points_data, k, 4)
+            p = Problem("grasp", wine_points_data, k, 13)
             p.set_grasp_hyper_params(grasp_hps)
             problems['wine']['training']['grasp'].append(p)
         for genetic_hps in genetic_hyper_params:
-            p = Problem("genetic", iris_points_data, k, 4)
+            p = Problem("genetic", iris_points_data, k, 13)
             p.set_genetic_hyper_params(genetic_hps)
             problems['wine']['training']['genetic'].append(p)
-        problems['wine']['training']['kmeans'].append(Problem("kmeans", wine_points_data, k, 4))
+        problems['wine']['training']['kmeans'].append(Problem("kmeans", wine_points_data, k, 13))
     
     for k in wine_ks_test:
         for sa_hps in sa_hyper_params:
-            p = Problem("sa", iris_points_data, k, 4)
+            p = Problem("sa", iris_points_data, k, 13)
             p.set_sa_hyper_params(sa_hps)
             problems['wine']['testing']['sa'].append(p)
         for grasp_hps in grasp_hyper_params:
-            p = Problem("grasp", wine_points_data, k, 4)
+            p = Problem("grasp", wine_points_data, k, 13)
             p.set_grasp_hyper_params(grasp_hps)
             problems['wine']['testing']['grasp'].append(p)
         for genetic_hps in genetic_hyper_params:
-            p = Problem("genetic", wine_points_data, k, 4)
+            p = Problem("genetic", wine_points_data, k, 13)
             p.set_genetic_hyper_params(genetic_hps)
             problems['wine']['testing']['genetic'].append(p)
-        problems['wine']['testing']['kmeans'].append(Problem("kmeans", wine_points_data, k, 4))
+        problems['wine']['testing']['kmeans'].append(Problem("kmeans", wine_points_data, k, 13))
 
     return problems

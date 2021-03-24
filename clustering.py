@@ -8,6 +8,9 @@ import numpy as np
 
 # Calculating the distance between two points:
 def euclidian_dist(a : np.array, b : np.array) -> float:
+    print(a, a.shape)
+    print(b, b.shape)
+    
     result : float = 0
     aux : np.array = a - b
     aux = aux ** 2
@@ -163,16 +166,21 @@ class Clusters:
     # Disturbing the current state to create a possible neighbour:
     def disturb(self):
         # Disturbance will be achieved by selecting a random cluster and removing the furthest point to the cluster with closest centroid
-        c : int = random.randint(0, self._k - 1)
-        new_c : int = c
-        while new_c == c:
-            new_c = random.randint(0, self._k - 1)
-        index : int = random.randint(0, self._num_points - 1)
-        self._disturbed_clusters[index] = new_c
-        self._disturbed_centroids[c] = self.cluster_centroid(c, self._clusters)
-        self._disturbed_centroids[new_c] = self.cluster_centroid(new_c, self._clusters)
-        self.calculate_sse_in_cluster(c, self._disturbed_clusters, self._disturbed_centroids)
-        self.calculate_sse_in_cluster(new_c, self._disturbed_clusters, self._disturbed_centroids)
+        cluster : int =  random.randint(0, self._k - 1)
+        points : np.array = self.get_points_in_cluster(cluster, self._clusters)
+        index : int = self.furthest_in_set(points, cluster)
+        dist : float = np.inf
+        closest : int = -1
+        for c in range(self._k):
+            d : float = euclidian_dist(self._points_data[index], self._centroids[c])
+            if d < dist:
+                dist = d
+                closest = c
+        self._disturbed_clusters[index] = closest
+        self._disturbed_centroids[closest] = self.cluster_centroid(closest, self._disturbed_clusters)
+        self._disturbed_centroids[cluster] = self.cluster_centroid(cluster, self._disturbed_clusters)
+        self.calculate_sse_in_cluster(closest, self._disturbed_clusters, self._disturbed_centroids)
+        self.calculate_sse_in_cluster(cluster, self._disturbed_clusters, self._disturbed_centroids)
         self._disturbed_sse = self.calculate_sse(self._disturbed_clusters, self._disturbed_centroids)
 
     k = property(get_k)
