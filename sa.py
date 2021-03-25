@@ -52,11 +52,9 @@ def simulated_annealing(hyper_params : HyperParams, clusters : clt.Clusters) -> 
             # Comparing the costs of the current state and the disturbed state:
             delta : float = clusters.disturbed_sse - clusters.sse
 
-            if delta <= 0:
+            if delta < 0 or random.random() < math.exp(-delta / current_temp):
                 if clusters.disturbed_sse < smallest:
                     smallest = clusters.disturbed_sse
-                clusters.accept_disturbed()
-            elif random.random() < math.exp(-delta / current_temp):
                 clusters.accept_disturbed()
 
             iterations += 1

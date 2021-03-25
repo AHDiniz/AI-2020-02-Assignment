@@ -8,9 +8,6 @@ import numpy as np
 
 # Calculating the distance between two points:
 def euclidian_dist(a : np.array, b : np.array) -> float:
-    print(a, a.shape)
-    print(b, b.shape)
-    
     result : float = 0
     aux : np.array = a - b
     aux = aux ** 2
@@ -19,13 +16,14 @@ def euclidian_dist(a : np.array, b : np.array) -> float:
 
 # Class that will hold data about the clusters:
 class Clusters:
-    def __init__(self, k : int, data : np.array, point_dim : int):
+    def __init__(self, k : int, data : np.array):
         self._k : int = k
-        self._point_dim : tuple = (1, point_dim)
+        self._point_dim : tuple = (1, data.shape[1])
         
         # Setting up the points array:
         self._points_data = data
         self._num_points : int = self._points_data.shape[0]
+        np.reshape(self._points_data, (self._num_points, self._point_dim[1]))
 
         # Creating a random seed:
         random.seed(time.thread_time_ns())
@@ -34,13 +32,13 @@ class Clusters:
         self._clusters : np.array = np.zeros(self._num_points, dtype=int)
         self._centroids = list([])
         for i in range(self._k):
-            self._centroids.append(np.zeros(point_dim))
+            self._centroids.append(np.zeros(self._point_dim))
         
         # Initializing the distubed data arrays:
         self._disturbed_clusters : np.array = np.zeros(self._num_points, dtype=int)
         self._disturbed_centroids = list([])
         for i in range(self._k):
-            self._disturbed_centroids.append(np.zeros(point_dim))
+            self._disturbed_centroids.append(np.zeros(self._point_dim))
         
         # Initializing the cost of the regular state and the disturbed state:
         self._sse : float = 0
@@ -50,14 +48,29 @@ class Clusters:
         self._sse_per_cluster : list = []
         for i in range(self._k):
             self._sse_per_cluster.append(0.)
-    
-    # Initializing the state of the clusters:
-    def initialize_state(self):
-        # Setting up the lists of points index set:
+
+    # Initializing the state of the clusters given an array of centroids:
+    def initialize_state(self, centroids : list = None):
+        if centroids != None:
+            self.centroids = centroids
+        else:
+            # Calculating the initial values of the centroids:
+            max_in_columns = np.amax(self._points_data, 0)
+            min_in_columns = np.amin(self._points_data, 0)
+            for i in range(self._k):
+                for j in range(self._point_dim[1]):
+                    self._centroids[i] = random.uniform(min_in_columns[j], max_in_columns[j])
+
         for i in range(self._num_points):
-            self._clusters[i] = random.randint(0, self._k - 1)
+            dist : float = np.inf
+            closest : int = -1
+            for j in range(self._k):
+                d : float = euclidian_dist(self._points_data[i], self._centroids[j])
+                if d < dist:
+                    dist = d
+                    closest = j
+            self._clusters[i] = closest
         
-        # Calculating the initial values of the centroids:
         for i in range(self._k):
             self.calculate_sse_in_cluster(i, self._clusters, self._centroids)
         
@@ -67,6 +80,10 @@ class Clusters:
     def get_k(self) -> int:
         return self._k
     
+    # Returning the dimension of a single point:
+    def get_point_dim(self) -> tuple:
+        return self._point_dim
+
     # Returning the cluster identifier of each point:
     def get_clusters(self) -> np.array:
         return self._clusters
@@ -82,6 +99,11 @@ class Clusters:
     # Returning the list of centroids of each cluster:
     def get_centroids(self) -> list:
         return self._centroids
+    
+    # Reseting the list of centroids of each cluster:
+    def set_centroids(self, centroids : list):
+        for i in range(self._k):
+            self._centroids[i] = centroids[i]
     
     # Returning the list of centroids of each cluster in the disturbed state:
     def get_disturbed_centroids(self) -> list:
@@ -184,11 +206,12 @@ class Clusters:
         self._disturbed_sse = self.calculate_sse(self._disturbed_clusters, self._disturbed_centroids)
 
     k = property(get_k)
+    point_dim = property(get_point_dim)
     points = property(get_points)
     num_points = property(get_num_points)
     sse = property(get_sse)
     disturbed_sse = property(get_disturbed_sse)
     clusters = property(get_clusters)
     disturbed_clusters = property(get_disturbed_clusters)
-    centroids = property(get_centroids)
+    centroids = property(get_centroids, set_centroids)
     disturbed_centroids = property(get_disturbed_centroids)

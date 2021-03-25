@@ -19,7 +19,7 @@ For each method:
     Obtain best config. by time and by ranking
     Obtain 5 best results and elapsed times of each config. of each method
     Obtain the ranking of each config of each method e it's avarage ranking
-Return table with best config by method by mean and by ranking
+Return table with best config by method by mean and by ranking  
 '''
 
 class TrainingResult:
@@ -32,7 +32,14 @@ class TrainingResult:
         self._z_scores : np.array = np.copy(z_scores)
         self._hyper_param_list : list = hyper_param_list.copy()
         self._std_list : list = std_list.copy()
+        self._population_list : list = None
     
+    # The population result of the genetic algorithm implementation:
+    def set_population_list(self, population_list : list):
+        self._population_list = population_list
+    def get_population_list(self) -> list:
+        return self._population_list
+
     # Name of the method used as metaheuristic:
     @property
     def method_name(self) -> str:
@@ -95,8 +102,8 @@ class TrainingResult:
                     min_time = self._avg_elapsed_list[j]
                     config = hyper_param_list[j]
             
-            best_configs.add(config)
-            best_indeces.add(min_index)
+            best_configs.append(config)
+            best_indeces.append(min_index)
         
         return best_configs
     
@@ -117,10 +124,12 @@ class TrainingResult:
                     min_time = self._avg_sse_list[j]
                     config = hyper_param_list[j]
             
-            best_configs.add(config)
-            best_indeces.add(min_index)
+            best_configs.append(config)
+            best_indeces.append(min_index)
         
         return best_configs
+    
+    population_list = property(get_population_list, set_population_list)
 
 def training(problems : dict) -> dict:
     results : dict = {}
@@ -132,13 +141,13 @@ def training(problems : dict) -> dict:
         #sa_hyper_params_list = problem['training']['sa']
         #sa_result = train_sa(sa_hyper_params_list)
 
-        grasp_hyper_params_list = problem['training']['grasp']
-        grasp_result = train_grasp(grasp_hyper_params_list)
+        #grasp_hyper_params_list = problem['training']['grasp']
+        #grasp_result = train_grasp(grasp_hyper_params_list)
 
         genetic_hyper_params_list = problem['training']['genetic']
         genetic_result = train_genetic(genetic_hyper_params_list)
 
-        results[problem_name] = {'sa': None, 'grasp': grasp_result, 'genetic': genetic_result}
+        results[problem_name] = {'sa': None, 'grasp': None, 'genetic': genetic_result}
 
     return results
 
@@ -162,7 +171,7 @@ def train_sa(hyper_param_list: list) -> TrainingResult:
         sse_list : list = []
 
         for i in range(0, 9):
-            clusters : clt.Clusters = clt.Clusters(k, config.data_set, config.point_dim)
+            clusters : clt.Clusters = clt.Clusters(k, config.data_set)
             (result, elapsed_time) = sa.simulated_annealing(hyper_params, clusters)
             sse_list.append(result)
             elapsed_list.append(elapsed_time)
@@ -196,7 +205,7 @@ def train_grasp(hyper_param_list : list) -> TrainingResult:
 
     for config in hyper_param_list:
         k : int = config.k
-        clusters : clt.Clusters = clt.Clusters(k, config.data_set, 13)
+        clusters : clt.Clusters = clt.Clusters(k, config.data_set)
         hyper_params : grasp.HyperParams = config.grasp_hyper_params
         
         avarage_sse : float = 0
@@ -205,18 +214,18 @@ def train_grasp(hyper_param_list : list) -> TrainingResult:
 
         for i in range(0, 9):
             (result, elapsed_time) = grasp.grasp(hyper_params, clusters)
-            sse_list.add(result)
-            elapsed_list.add(elapsed_time)
+            sse_list.append(result)
+            elapsed_list.append(elapsed_time)
             avarage_sse += result
             avarage_elapsed += elapsed_time
         
-        std_list.add(np.std(sse_list))
+        std_list.append(np.std(sse_list))
         
         print("Avarage result =", avarage_sse / 10)
 
-        sse_lists.add(sse_list)
-        avarage_sse_list.add(avarage_sse / 10)
-        avarage_elapsed_list.add(avarage_elapsed / 10)
+        sse_lists.append(sse_list)
+        avarage_sse_list.append(avarage_sse / 10)
+        avarage_elapsed_list.append(avarage_elapsed / 10)
 
     z_scores : np.array = sp.stats.zscore(avarage_sse_list)
 
@@ -234,6 +243,7 @@ def train_genetic(hyper_param_list : list) -> TrainingResult:
 
     avarage_elapsed_list : list = []
     elapsed_list : list = []
+    population_list : list = []
 
     for config in hyper_param_list:
         k : int = config.k
@@ -245,22 +255,25 @@ def train_genetic(hyper_param_list : list) -> TrainingResult:
         sse_list : list = []
 
         for i in range(0, 9):
-            (result, elapsed_time) = genetic.genetic(hyper_params, clusters)
-            sse_list.add(result.sse)
-            elapsed_list.add(elapsed_time)
-            avarage_sse += result.sse
+            population : genetic.Population = genetic.Population(k, hyper_params.population_size, clusters)
+            (result, elapsed_time) = genetic.genetic(hyper_params, clusters, population)
+            sse_list.append(result)
+            elapsed_list.append(elapsed_time)
+            avarage_sse += result
             avarage_elapsed += elapsed_time
+            population_list.append(population)
         
-        std_list.add(np.std(sse_list))
+        std_list.append(np.std(sse_list))
         
         print("Avarage result =", avarage_sse / 10)
 
-        sse_lists.add(sse_list)
-        avarage_sse_list.add(avarage_sse / 10)
-        avarage_elapsed_list.add(avarage_elapsed / 10)
+        sse_lists.append(sse_list)
+        avarage_sse_list.append(avarage_sse / 10)
+        avarage_elapsed_list.append(avarage_elapsed / 10)
 
     z_scores : np.array = sp.stats.zscore(avarage_sse_list)
 
     result : TrainingResult = TrainingResult("Genetic Algorithm", avarage_sse_list, sse_list, avarage_elapsed_list, elapsed_list, z_scores, hyper_param_list, std_list)
+    result.population_list = population_list
 
     return result

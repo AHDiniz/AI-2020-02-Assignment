@@ -35,8 +35,6 @@ def grasp(hyper_params : HyperParams, clusters : clt.Clusters) -> (float, float)
     init_time : float = time.time()
     current_time : float = 0
 
-    clusters.initialize_state()
-
     result : float = 0
     best_solutions : set = set([])
     solutions_added : int = 0
@@ -45,6 +43,7 @@ def grasp(hyper_params : HyperParams, clusters : clt.Clusters) -> (float, float)
 
     while iterations < hyper_params.num_iter:
         
+        clusters.initialize_state()
         # Use local search to create a new solution:
         local_search = hill_climbing(clusters)
         # If can fit in the best solutions, push to it to list of best solutions
@@ -58,9 +57,9 @@ def grasp(hyper_params : HyperParams, clusters : clt.Clusters) -> (float, float)
         # Set current state to best state
         result = min(best_solutions)
 
+        iterations += 1
         current_time = time.time()
         if current_time - init_time >= 1:
             break
-        iterations += 1
 
     return (result, current_time - init_time)

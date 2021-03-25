@@ -9,10 +9,9 @@ import genetic as genetic
 import clustering as clt
 
 class Problem:
-    def __init__(self, problem_name : str, data_set : np.array, k : int, point_dim : int):
+    def __init__(self, problem_name : str, data_set : np.array, k : int):
         self._data_set = np.copy(data_set)
         self._k = k
-        self._point_dim = point_dim
         self._sa_hyper_params = None
         self._grasp_hyper_params = None
         self._genetic_hyper_params = None
@@ -24,10 +23,6 @@ class Problem:
     @property
     def k(self) -> int:
         return self._k
-    
-    @property
-    def point_dim(self) -> int:
-        return self._point_dim
 
     def set_sa_hyper_params(self, hyper_params : sa.HyperParams):
         self._sa_hyper_params = hyper_params
@@ -92,34 +87,33 @@ def load_problems() -> dict:
 
     for k in iris_ks_training:
         for sa_hps in sa_hyper_params:
-            p = Problem("sa", iris_points_data, k, 4)
+            p = Problem("sa", iris_points_data, k)
             p.set_sa_hyper_params(sa_hps)
             problems['iris']['training']['sa'].append(p)
         for grasp_hps in grasp_hyper_params:
-            p = Problem("grasp", iris_points_data, k, 4)
+            p = Problem("grasp", iris_points_data, k)
             p.set_grasp_hyper_params(grasp_hps)
             problems['iris']['training']['grasp'].append(p)
         for genetic_hps in genetic_hyper_params:
-            p = Problem("genetic", iris_points_data, k, 4)
+            p = Problem("genetic", iris_points_data, k)
             p.set_genetic_hyper_params(genetic_hps)
             problems['iris']['training']['genetic'].append(p)
-        problems['iris']['training']['kmeans'].append(Problem("kmeans", iris_points_data, k, 4))
-        
+        problems['iris']['training']['kmeans'].append(Problem("kmeans", iris_points_data, k))
     
     for k in iris_ks_test:
         for sa_hps in sa_hyper_params:
-            p = Problem("sa", iris_points_data, k, 4)
+            p = Problem("sa", iris_points_data, k)
             p.set_sa_hyper_params(sa_hps)
             problems['iris']['testing']['sa'].append(p)
         for grasp_hps in grasp_hyper_params:
-            p = Problem("grasp", iris_points_data, k, 4)
+            p = Problem("grasp", iris_points_data, k)
             p.set_grasp_hyper_params(grasp_hps)
             problems['iris']['testing']['grasp'].append(p)
         for genetic_hps in genetic_hyper_params:
-            p = Problem("genetic", iris_points_data, k, 4)
+            p = Problem("genetic", iris_points_data, k)
             p.set_genetic_hyper_params(genetic_hps)
             problems['iris']['testing']['genetic'].append(p)
-        problems['iris']['testing']['kmeans'].append(Problem("kmeans", iris_points_data, k, 4))
+        problems['iris']['testing']['kmeans'].append(Problem("kmeans", iris_points_data, k))
 
     # Creating clustering data for the wine data set:
     wine_ks_training : list = [2,6,9,11,13]
@@ -130,32 +124,32 @@ def load_problems() -> dict:
 
     for k in wine_ks_training:
         for sa_hps in sa_hyper_params:
-            p = Problem("sa", wine_points_data, k, 13)
+            p = Problem("sa", wine_points_data, k)
             p.set_sa_hyper_params(sa_hps)
             problems['wine']['training']['sa'].append(p)
         for grasp_hps in grasp_hyper_params:
-            p = Problem("grasp", wine_points_data, k, 13)
+            p = Problem("grasp", wine_points_data, k)
             p.set_grasp_hyper_params(grasp_hps)
             problems['wine']['training']['grasp'].append(p)
         for genetic_hps in genetic_hyper_params:
-            p = Problem("genetic", iris_points_data, k, 13)
+            p = Problem("genetic", iris_points_data, k)
             p.set_genetic_hyper_params(genetic_hps)
             problems['wine']['training']['genetic'].append(p)
-        problems['wine']['training']['kmeans'].append(Problem("kmeans", wine_points_data, k, 13))
+        problems['wine']['training']['kmeans'].append(Problem("kmeans", wine_points_data, k))
     
     for k in wine_ks_test:
         for sa_hps in sa_hyper_params:
-            p = Problem("sa", iris_points_data, k, 13)
+            p = Problem("sa", iris_points_data, k)
             p.set_sa_hyper_params(sa_hps)
             problems['wine']['testing']['sa'].append(p)
         for grasp_hps in grasp_hyper_params:
-            p = Problem("grasp", wine_points_data, k, 13)
+            p = Problem("grasp", wine_points_data, k)
             p.set_grasp_hyper_params(grasp_hps)
             problems['wine']['testing']['grasp'].append(p)
         for genetic_hps in genetic_hyper_params:
-            p = Problem("genetic", wine_points_data, k, 13)
+            p = Problem("genetic", wine_points_data, k)
             p.set_genetic_hyper_params(genetic_hps)
             problems['wine']['testing']['genetic'].append(p)
-        problems['wine']['testing']['kmeans'].append(Problem("kmeans", wine_points_data, k, 13))
+        problems['wine']['testing']['kmeans'].append(Problem("kmeans", wine_points_data, k))
 
     return problems
