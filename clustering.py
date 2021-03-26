@@ -21,7 +21,7 @@ class Clusters:
         self._point_dim : tuple = (1, data.shape[1])
         
         # Setting up the points array:
-        self._points_data = data
+        self._points_data = np.array(data)
         self._num_points : int = self._points_data.shape[0]
         np.reshape(self._points_data, (self._num_points, self._point_dim[1]))
 
@@ -55,11 +55,9 @@ class Clusters:
             self.centroids = centroids
         else:
             # Calculating the initial values of the centroids:
-            max_in_columns = np.amax(self._points_data, 0)
-            min_in_columns = np.amin(self._points_data, 0)
             for i in range(self._k):
-                for j in range(self._point_dim[1]):
-                    self._centroids[i].flat[j] = random.uniform(min_in_columns[j], max_in_columns[j])
+                index = np.random.choice(self._num_points, size=1, replace=False)[0]
+                self._centroids[i] = self._points_data[index]
 
         for i in range(self._num_points):
             dist : float = np.inf
@@ -74,6 +72,12 @@ class Clusters:
         for i in range(self._k):
             self.calculate_sse_in_cluster(i, self._clusters, self._centroids)
         
+        self._disturbed_sse = 0
+        self._disturbed_clusters : np.array = np.zeros(self._num_points, dtype=int)
+        self._disturbed_centroids = list([])
+        for i in range(self._k):
+            self._disturbed_centroids.append(np.zeros(self._point_dim))
+
         self._sse = self.calculate_sse()
 
     # Getting the number of clusters:
@@ -123,7 +127,7 @@ class Clusters:
         for i in range(self._num_points):
             if clusters[i] == cluster:
                 indices.append(i)
-        result : np.array = np.take(self.points, indices)
+        result : np.array = np.take(self.points, indices, axis = 0)
         return result
     
     # Getting the number of points in a given cluster:

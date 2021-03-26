@@ -17,18 +17,12 @@ class HyperParams:
     def num_best_solutions(self) -> int:
         return self._num_best_solutions
 
-def hill_climbing(clusters : clt.Clusters) -> float:
-
-    init_time : float = time.time()
-    current_time : float = 0
-
-    while current_time - init_time < 0.1:
-        clusters.disturb()
-        if clusters.disturbed_sse < clusters.sse:
-            clusters.accept_disturbed()
-        current_time = time.time()
-    
-    return clusters.sse
+def local_search(clusters : clt.Clusters, current_value : float) -> float:
+    clusters.disturb()
+    if (clusters.disturbed_sse <= current_value):
+        return local_search(clusters, clusters.disturbed_sse)
+    else:
+        return current_value
 
 def grasp(hyper_params : HyperParams, clusters : clt.Clusters) -> (float, float):
     
@@ -45,15 +39,16 @@ def grasp(hyper_params : HyperParams, clusters : clt.Clusters) -> (float, float)
         
         clusters.initialize_state()
         # Use local search to create a new solution:
-        local_search = hill_climbing(clusters)
+        local : float = local_search(clusters, clusters.sse)
         # If can fit in the best solutions, push to it to list of best solutions
         if solutions_added < hyper_params.num_best_solutions:
-            best_solutions.add(local_search)
+            best_solutions.add(local)
+            solutions_added += 1
         else:
             less_best : float = max(best_solutions)
-            if local_search < less_best:
+            if local < less_best:
                 best_solutions.remove(less_best)
-                best_solutions.add(local_search)
+                best_solutions.add(local)
         # Set current state to best state
         result = min(best_solutions)
 

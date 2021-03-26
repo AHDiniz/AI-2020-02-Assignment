@@ -114,14 +114,14 @@ class TrainingResult:
         best_indeces : list = []
 
         for i in range(5):
-            min_time : float = np.inf
+            min_sse : float = np.inf
             min_index : int = 0
             config = None
 
             for j in range(len(hyper_param_list)):
-                if self._avg_sse_list[j] < min_time and not j in best_indeces:
+                if self._avg_sse_list[j] < min_sse and not j in best_indeces:
                     min_index = j
-                    min_time = self._avg_sse_list[j]
+                    min_sse = self._avg_sse_list[j]
                     config = hyper_param_list[j]
             
             best_configs.append(config)
@@ -170,7 +170,7 @@ def train_sa(hyper_param_list: list) -> TrainingResult:
         avarage_elapsed : float = 0
         sse_list : list = []
 
-        for i in range(0, 9):
+        for i in range(10):
             clusters : clt.Clusters = clt.Clusters(k, config.data_set)
             (result, elapsed_time) = sa.simulated_annealing(hyper_params, clusters)
             sse_list.append(result)
@@ -205,14 +205,14 @@ def train_grasp(hyper_param_list : list) -> TrainingResult:
 
     for config in hyper_param_list:
         k : int = config.k
-        clusters : clt.Clusters = clt.Clusters(k, config.data_set)
         hyper_params : grasp.HyperParams = config.grasp_hyper_params
         
         avarage_sse : float = 0
         avarage_elapsed : float = 0
         sse_list : list = []
 
-        for i in range(0, 9):
+        for i in range(10):
+            clusters : clt.Clusters = clt.Clusters(k, config.data_set)
             (result, elapsed_time) = grasp.grasp(hyper_params, clusters)
             sse_list.append(result)
             elapsed_list.append(elapsed_time)
@@ -254,14 +254,15 @@ def train_genetic(hyper_param_list : list) -> TrainingResult:
         avarage_elapsed : float = 0
         sse_list : list = []
 
-        for i in range(0, 9):
-            population : genetic.Population = genetic.Population(k, hyper_params.population_size, clusters)
+        population : genetic.Population = genetic.Population(k, hyper_params.population_size, clusters)
+        population_list.append(population)
+        
+        for i in range(10):
             (result, elapsed_time) = genetic.genetic(hyper_params, clusters, population)
             sse_list.append(result)
             elapsed_list.append(elapsed_time)
             avarage_sse += result
             avarage_elapsed += elapsed_time
-            population_list.append(population)
         
         std_list.append(np.std(sse_list))
         
