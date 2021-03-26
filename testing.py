@@ -23,4 +23,3 @@ Paired table with results
 Return best method in general by avarage result and by avarage ranking
 '''
 
-

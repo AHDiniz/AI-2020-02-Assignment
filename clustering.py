@@ -59,7 +59,7 @@ class Clusters:
             min_in_columns = np.amin(self._points_data, 0)
             for i in range(self._k):
                 for j in range(self._point_dim[1]):
-                    self._centroids[i] = random.uniform(min_in_columns[j], max_in_columns[j])
+                    self._centroids[i].flat[j] = random.uniform(min_in_columns[j], max_in_columns[j])
 
         for i in range(self._num_points):
             dist : float = np.inf
@@ -74,7 +74,7 @@ class Clusters:
         for i in range(self._k):
             self.calculate_sse_in_cluster(i, self._clusters, self._centroids)
         
-        self._sse = self.calculate_sse(self._clusters, self._centroids)
+        self._sse = self.calculate_sse()
 
     # Getting the number of clusters:
     def get_k(self) -> int:
@@ -119,14 +119,20 @@ class Clusters:
     
     # Getting array of points that are in a given cluster:
     def get_points_in_cluster(self, cluster : int, clusters : np.array) -> np.array:
-        indices : np.array = np.where(clusters == cluster)[0]
+        indices : list = list([])
+        for i in range(self._num_points):
+            if clusters[i] == cluster:
+                indices.append(i)
         result : np.array = np.take(self.points, indices)
         return result
     
     # Getting the number of points in a given cluster:
     def get_num_in_cluster(self, cluster : int, clusters : np.array) -> int:
-        indices : np.array = np.where(clusters == cluster)[0]
-        return np.size(indices)
+        indices : list = list([])
+        for i in range(self._num_points):
+            if clusters[i] == cluster:
+                indices.append(i)
+        return len(indices)
     
     # Changing the cluster of a given point:
     def move_point(self, point_index : int = 0, cluster_id : int = 0):
@@ -162,7 +168,7 @@ class Clusters:
             self._sse_per_cluster[c] += euclidian_dist(point, centroids[c]) ** 2
 
     # Calcuting the sum of squares of euclidian distances:
-    def calculate_sse(self, clusters : np.array, centroids : list) -> float:
+    def calculate_sse(self) -> float:
         result : float = 0
         for c in range(self._k):
             result += self._sse_per_cluster[c]
@@ -203,7 +209,7 @@ class Clusters:
         self._disturbed_centroids[cluster] = self.cluster_centroid(cluster, self._disturbed_clusters)
         self.calculate_sse_in_cluster(closest, self._disturbed_clusters, self._disturbed_centroids)
         self.calculate_sse_in_cluster(cluster, self._disturbed_clusters, self._disturbed_centroids)
-        self._disturbed_sse = self.calculate_sse(self._disturbed_clusters, self._disturbed_centroids)
+        self._disturbed_sse = self.calculate_sse()
 
     k = property(get_k)
     point_dim = property(get_point_dim)

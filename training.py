@@ -138,16 +138,16 @@ def training(problems : dict) -> dict:
 
         print("Starting the training procedure with the", problem_name, "dataset.")
         
-        #sa_hyper_params_list = problem['training']['sa']
-        #sa_result = train_sa(sa_hyper_params_list)
+        sa_hyper_params_list = problem['training']['sa']
+        sa_result = train_sa(sa_hyper_params_list)
 
-        #grasp_hyper_params_list = problem['training']['grasp']
-        #grasp_result = train_grasp(grasp_hyper_params_list)
+        grasp_hyper_params_list = problem['training']['grasp']
+        grasp_result = train_grasp(grasp_hyper_params_list)
 
         genetic_hyper_params_list = problem['training']['genetic']
         genetic_result = train_genetic(genetic_hyper_params_list)
 
-        results[problem_name] = {'sa': None, 'grasp': None, 'genetic': genetic_result}
+        results[problem_name] = {'sa': sa_result, 'grasp': grasp_result, 'genetic': genetic_result}
 
     return results
 
