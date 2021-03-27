@@ -1,8 +1,9 @@
-#!/usr/bin/python3
+#!/usr/bin/python3.8
 
 import numpy as np
 import seaborn as sns
 from sklearn import datasets
+import pandas as ps
 import sa as sa
 import grasp as grasp
 import genetic as genetic
@@ -139,7 +140,7 @@ def load_problems() -> dict:
     
     for k in wine_ks_test:
         for sa_hps in sa_hyper_params:
-            p = Problem("sa", iris_points_data, k)
+            p = Problem("sa", wine_points_data, k)
             p.set_sa_hyper_params(sa_hps)
             problems['wine']['testing']['sa'].append(p)
         for grasp_hps in grasp_hyper_params:
@@ -151,5 +152,26 @@ def load_problems() -> dict:
             p.set_genetic_hyper_params(genetic_hps)
             problems['wine']['testing']['genetic'].append(p)
         problems['wine']['testing']['kmeans'].append(Problem("kmeans", wine_points_data, k))
+    
+    # Creating clustering data for the ionosphere dataset:
+    iono_ks_test : list = [2,3,5,10,15,20,25,30,40,50]
+    iono_ds = ps.read_csv('ionosphere.data')
+    iono_points_data = iono_ds.to_numpy()
+    iono_points_data = np.delete(iono_points_data, iono_points_data.shape[1] - 1, 1)
+
+    for k in iono_ks_test:
+        for sa_hps in sa_hyper_params:
+            p = Problem("sa", iono_points_data, k)
+            p.set_sa_hyper_params(sa_hps)
+            problems['iono']['testing']['sa'].append(p)
+        for grasp_hps in grasp_hyper_params:
+            p = Problem("grasp", iono_points_data, k)
+            p.set_grasp_hyper_params(grasp_hps)
+            problems['iono']['testing']['grasp'].append(p)
+        for genetic_hps in genetic_hyper_params:
+            p = Problem("genetic", iono_points_data, k)
+            p.set_genetic_hyper_params(genetic_hps)
+            problems['iono']['testing']['genetic'].append(p)
+        problems['iono']['testing']['kmeans'].append(Problem("kmeans", iono_points_data, k))
 
     return problems

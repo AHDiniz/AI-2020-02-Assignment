@@ -1,4 +1,4 @@
-#!/usr/bin/python3
+#!/usr/bin/python3.8
 
 import numpy as np
 import scipy as sp
@@ -18,8 +18,8 @@ For each method:
     Obtain avarage result, standard deviation and avarage ranking of each config.
     Obtain best config. by time and by ranking
     Obtain 5 best results and elapsed times of each config. of each method
-    Obtain the ranking of each config of each method e it's avarage ranking
-Return table with best config by method by mean and by ranking  
+    Obtain the ranking of each config for each method and it's avarage ranking
+Return table with best config for each method by mean and by ranking
 '''
 
 class TrainingResult:
@@ -55,6 +55,11 @@ class TrainingResult:
     def sse_list(self) -> list:
         return self._sse_list
     
+    # Z-Scores:
+    @property
+    def z_scores(self) -> np.array:
+        return self._z_scores
+    
     # List of each configuration avarage elapsed time:
     @property
     def avg_elapsed_list(self) -> list:
@@ -71,14 +76,18 @@ class TrainingResult:
         return self._hyper_param_list
     
     # Returning hyperparameter configuration with the best avarage elapsed time:
-    @property
     def best_config_time(self):
-        return hyper_param_list[self._avg_elapsed_list.index(min(self._avg_elapsed_list))]
+        return self._hyper_param_list[self._avg_elapsed_list.index(min(self._avg_elapsed_list))]
     
     # Returing hyperparameter configuration with the best zscore:
     @property
     def best_config_zscore(self):
-        return hyper_param_list[np.where(self._z_scores == np.amin(self._z_scores))]
+        return self._hyper_param_list[np.where(self._z_scores == np.amin(self._z_scores))]
+    
+    # Returning hyperparameter configuration with the best avarage result:
+    @property
+    def best_config_avg_result(self):
+        return self._hyper_param_list[self._avg_sse_list.index(min(self._avg_sse_list))]
     
     # Returning the metaheuristic's avarage score:
     @property
@@ -96,11 +105,11 @@ class TrainingResult:
             min_index : int = 0
             config = None
 
-            for j in range(len(hyper_param_list)):
+            for j in range(len(self._hyper_param_list)):
                 if self._avg_elapsed_list[j] < min_time and not j in best_indeces:
                     min_index = j
                     min_time = self._avg_elapsed_list[j]
-                    config = hyper_param_list[j]
+                    config = self._hyper_param_list[j]
             
             best_configs.append(config)
             best_indeces.append(min_index)
@@ -118,11 +127,11 @@ class TrainingResult:
             min_index : int = 0
             config = None
 
-            for j in range(len(hyper_param_list)):
+            for j in range(len(self._hyper_param_list)):
                 if self._avg_sse_list[j] < min_sse and not j in best_indeces:
                     min_index = j
                     min_sse = self._avg_sse_list[j]
-                    config = hyper_param_list[j]
+                    config = self._hyper_param_list[j]
             
             best_configs.append(config)
             best_indeces.append(min_index)
