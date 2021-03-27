@@ -163,15 +163,15 @@ def load_problems() -> dict:
         for sa_hps in sa_hyper_params:
             p = Problem("sa", iono_points_data, k)
             p.set_sa_hyper_params(sa_hps)
-            problems['iono']['testing']['sa'].append(p)
+            problems['ionosphere']['testing']['sa'].append(p)
         for grasp_hps in grasp_hyper_params:
             p = Problem("grasp", iono_points_data, k)
             p.set_grasp_hyper_params(grasp_hps)
-            problems['iono']['testing']['grasp'].append(p)
+            problems['ionosphere']['testing']['grasp'].append(p)
         for genetic_hps in genetic_hyper_params:
             p = Problem("genetic", iono_points_data, k)
             p.set_genetic_hyper_params(genetic_hps)
-            problems['iono']['testing']['genetic'].append(p)
-        problems['iono']['testing']['kmeans'].append(Problem("kmeans", iono_points_data, k))
+            problems['ionosphere']['testing']['genetic'].append(p)
+        problems['ionosphere']['testing']['kmeans'].append(Problem("kmeans", iono_points_data, k))
 
     return problems

@@ -131,7 +131,7 @@ class TrainingResult:
                 if self._avg_sse_list[j] < min_sse and not j in best_indeces:
                     min_index = j
                     min_sse = self._avg_sse_list[j]
-                    config = self._hyper_param_list[j]
+                    config = (self._hyper_param_list[j], min_sse, self.method_name)
             
             best_configs.append(config)
             best_indeces.append(min_index)
@@ -148,21 +148,21 @@ def training(problems : dict) -> dict:
         print("Starting the training procedure with the", problem_name, "dataset.")
         
         sa_hyper_params_list = problem['training']['sa']
-        sa_result = train_sa(sa_hyper_params_list)
+        sa_result = train_sa(sa_hyper_params_list, problem_name)
 
         grasp_hyper_params_list = problem['training']['grasp']
-        grasp_result = train_grasp(grasp_hyper_params_list)
+        grasp_result = train_grasp(grasp_hyper_params_list, problem_name)
 
         genetic_hyper_params_list = problem['training']['genetic']
-        genetic_result = train_genetic(genetic_hyper_params_list)
+        genetic_result = train_genetic(genetic_hyper_params_list, problem_name)
 
         results[problem_name] = {'sa': sa_result, 'grasp': grasp_result, 'genetic': genetic_result}
 
     return results
 
-def train_sa(hyper_param_list: list) -> TrainingResult:
+def train_sa(hyper_param_list: list, problem_name : str) -> TrainingResult:
 
-    print("Training the Simulated Annealing metaheuristic...")
+    print("Training the Simulated Annealing metaheuristic with the", problem_name, "dataset...")
 
     avarage_sse_list : list = []
     sse_lists : list = []
@@ -193,17 +193,15 @@ def train_sa(hyper_param_list: list) -> TrainingResult:
         avarage_sse_list.append(avarage_sse / 10)
         avarage_elapsed_list.append(avarage_elapsed / 10)
 
-        print("Avarage result =", avarage_sse / 10)
-
     z_scores : np.array = sp.stats.zscore(avarage_sse_list)
 
-    result : TrainingResult = TrainingResult("Simulated Annealing", avarage_sse_list, sse_list, avarage_elapsed_list, elapsed_list, z_scores, hyper_param_list, std_list)
+    result : TrainingResult = TrainingResult("Simulated Annealing " + problem_name, avarage_sse_list, sse_list, avarage_elapsed_list, elapsed_list, z_scores, hyper_param_list, std_list)
 
     return result
 
-def train_grasp(hyper_param_list : list) -> TrainingResult:
+def train_grasp(hyper_param_list : list, problem_name : str) -> TrainingResult:
 
-    print("Training the GRASP metaheuristic...")
+    print("Training the GRASP metaheuristic with the", problem_name, "dataset...")
 
     avarage_sse_list : list = []
     sse_lists : list = []
@@ -230,21 +228,19 @@ def train_grasp(hyper_param_list : list) -> TrainingResult:
         
         std_list.append(np.std(sse_list))
         
-        print("Avarage result =", avarage_sse / 10)
-
         sse_lists.append(sse_list)
         avarage_sse_list.append(avarage_sse / 10)
         avarage_elapsed_list.append(avarage_elapsed / 10)
 
     z_scores : np.array = sp.stats.zscore(avarage_sse_list)
 
-    result : TrainingResult = TrainingResult("GRASP", avarage_sse_list, sse_list, avarage_elapsed_list, elapsed_list, z_scores, hyper_param_list, std_list)
+    result : TrainingResult = TrainingResult("GRASP " + problem_name, avarage_sse_list, sse_list, avarage_elapsed_list, elapsed_list, z_scores, hyper_param_list, std_list)
 
     return result
 
-def train_genetic(hyper_param_list : list) -> TrainingResult:
+def train_genetic(hyper_param_list : list, problem_name : str) -> TrainingResult:
 
-    print("Training the Genetic Algorithm metaheuristic...")
+    print("Training the Genetic Algorithm metaheuristic with the", problem_name, "dataset...")
 
     avarage_sse_list : list = []
     sse_lists : list = []
@@ -275,15 +271,13 @@ def train_genetic(hyper_param_list : list) -> TrainingResult:
         
         std_list.append(np.std(sse_list))
         
-        print("Avarage result =", avarage_sse / 10)
-
         sse_lists.append(sse_list)
         avarage_sse_list.append(avarage_sse / 10)
         avarage_elapsed_list.append(avarage_elapsed / 10)
 
     z_scores : np.array = sp.stats.zscore(avarage_sse_list)
 
-    result : TrainingResult = TrainingResult("Genetic Algorithm", avarage_sse_list, sse_list, avarage_elapsed_list, elapsed_list, z_scores, hyper_param_list, std_list)
+    result : TrainingResult = TrainingResult("Genetic Algorithm " + problem_name, avarage_sse_list, sse_list, avarage_elapsed_list, elapsed_list, z_scores, hyper_param_list, std_list)
     result.population_list = population_list
 
     return result
