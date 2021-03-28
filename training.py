@@ -145,6 +145,9 @@ def training(problems : dict) -> dict:
 
     for problem_name, problem in problems.items():
 
+        if problem_name == 'ionosphere':
+            continue
+
         print("Starting the training procedure with the", problem_name, "dataset.")
         
         sa_hyper_params_list = problem['training']['sa']

@@ -45,7 +45,7 @@ class Population:
     def crossover(self, a : int, b : int) -> clt.Clusters:
         offspring : clt.Clusters = clt.Clusters(self._instances[a].k, self._instances[a].points)
         
-        divide : int = random.randint(1, self._k - 2) if self._k - 2 != 1 else self._k - 2
+        divide : int = self._k // 2 if self._k <= 3 else random.randint(1, self._k - 2)
         centroids : list = list([])
         for i in range(self._k):
             centroids.append(self._instances[a].centroids[i] if i < divide else self._instances[b].centroids[i])
