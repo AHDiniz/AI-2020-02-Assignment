@@ -22,6 +22,237 @@ For each method:
 Return table with best config for each method by mean and by ranking
 '''
 
+# The data acquired by analysing the training results:
+class TrainingAnalysis:
+    def __init__(self, sa_results_list : list, grasp_results_list : list, genetic_results_list : list):
+        self._sa_results_list : list = sa_results_list
+        self._grasp_results_list : list = grasp_results_list
+        self._genetic_results_list : list = genetic_results_list
+    
+    @property
+    def sa_results_list(self) -> list:
+        return self._sa_results_list
+    
+    @property
+    def grasp_results_list(self) -> list:
+        return self._grasp_results_list
+    
+    @property
+    def genentic_results_list(self) -> list:
+        return self._genetic_results_list
+
+    @property
+    def five_best_config_sse(self) -> (list, list, list):
+        five_best_sa : list = []
+        five_best_grasp : list = []
+        five_best_genetic : list = []
+        
+        # Getting the five best hyperparameter configuration for Simulated Annealing:
+        for sa_result in self._sa_results_list:
+            config_result_tuple : tuple = sa_result.best_config_avg_result
+            
+            if (len(five_best_sa) < 5):
+                five_best_sa.append(config_result_tuple)
+            else:
+                less_best : tuple = max(five_best_sa, key = (lambda x : x[1]))
+                if less_best[1] > config_result_tuple[1]:
+                    five_best_sa.remove(less_best)
+                    five_best_sa.append(config_result_tuple)
+        
+        # Getting the five best hyperparameter configuration for GRASP:
+        for grasp_result in self._grasp_results_list:
+            config_result_tuple : tuple = grasp_result.best_config_avg_result
+            
+            if (len(five_best_grasp) < 5):
+                five_best_grasp.append(config_result_tuple)
+            else:
+                less_best : tuple = max(five_best_grasp, key = (lambda x : x[1]))
+                if less_best[1] > config_result_tuple[1]:
+                    five_best_grasp.remove(less_best)
+                    five_best_grasp.append(config_result_tuple)
+
+        # Getting the five best hyperparameter configuration for Genetic Algorithm:
+        for grasp_result in self._grasp_results_list:
+            config_result_tuple : tuple = grasp_result.best_config_avg_result
+            
+            if (len(five_best_grasp) < 5):
+                five_best_grasp.append(config_result_tuple)
+            else:
+                less_best : tuple = max(five_best_grasp, key = (lambda x : x[1]))
+                if less_best[1] > config_result_tuple[1]:
+                    five_best_grasp.remove(less_best)
+                    five_best_grasp.append(config_result_tuple)
+
+        return (five_best_sa, five_best_grasp, five_best_genetic)
+    
+    @property
+    def five_best_config_time(self) -> (list, list, list):
+        five_best_sa : list = []
+        five_best_grasp : list = []
+        five_best_genetic : list = []
+        
+        # Getting the five best hyperparameter configuration for Simulated Annealing:
+        for sa_result in self._sa_results_list:
+            config_result_tuple : tuple = sa_result.best_config_time
+            
+            if (len(five_best_sa) < 5):
+                five_best_sa.append(config_result_tuple)
+            else:
+                less_best : tuple = max(five_best_sa, key = (lambda x : x[2]))
+                if less_best[2] > config_result_tuple[2]:
+                    five_best_sa.remove(less_best)
+                    five_best_sa.append(config_result_tuple)
+        
+        # Getting the five best hyperparameter configuration for GRASP:
+        for grasp_result in self._grasp_results_list:
+            config_result_tuple : tuple = grasp_result.best_config_time
+            
+            if (len(five_best_grasp) < 5):
+                five_best_grasp.append(config_result_tuple)
+            else:
+                less_best : tuple = max(five_best_grasp, key = (lambda x : x[2]))
+                if less_best[2] > config_result_tuple[2]:
+                    five_best_grasp.remove(less_best)
+                    five_best_grasp.append(config_result_tuple)
+
+        # Getting the five best hyperparameter configuration for Genetic Algorithm:
+        for grasp_result in self._grasp_results_list:
+            config_result_tuple : tuple = grasp_result.best_config_time
+            
+            if (len(five_best_grasp) < 5):
+                five_best_grasp.append(config_result_tuple)
+            else:
+                less_best : tuple = max(five_best_grasp, key = (lambda x : x[2]))
+                if less_best[2] > config_result_tuple[2]:
+                    five_best_grasp.remove(less_best)
+                    five_best_grasp.append(config_result_tuple)
+
+        return (five_best_sa, five_best_grasp, five_best_genetic)
+    
+    @property
+    def five_best_config_zscore(self) -> (list, list, list):
+        five_best_sa : list = []
+        five_best_grasp : list = []
+        five_best_genetic : list = []
+        
+        # Getting the five best hyperparameter configuration for Simulated Annealing:
+        for sa_result in self._sa_results_list:
+            config_result_tuple : tuple = sa_result.best_config_zscore
+            
+            if (len(five_best_sa) < 5):
+                five_best_sa.append(config_result_tuple)
+            else:
+                less_best : tuple = max(five_best_sa, key = (lambda x : x[2]))
+                if less_best[2] > config_result_tuple[2]:
+                    five_best_sa.remove(less_best)
+                    five_best_sa.append(config_result_tuple)
+        
+        # Getting the five best hyperparameter configuration for GRASP:
+        for grasp_result in self._grasp_results_list:
+            config_result_tuple : tuple = grasp_result.best_config_zscore
+            
+            if (len(five_best_grasp) < 5):
+                five_best_grasp.append(config_result_tuple)
+            else:
+                less_best : tuple = max(five_best_grasp, key = (lambda x : x[2]))
+                if less_best[2] > config_result_tuple[2]:
+                    five_best_grasp.remove(less_best)
+                    five_best_grasp.append(config_result_tuple)
+
+        # Getting the five best hyperparameter configuration for Genetic Algorithm:
+        for grasp_result in self._grasp_results_list:
+            config_result_tuple : tuple = grasp_result.best_config_zscore
+            
+            if (len(five_best_grasp) < 5):
+                five_best_grasp.append(config_result_tuple)
+            else:
+                less_best : tuple = max(five_best_grasp, key = (lambda x : x[2]))
+                if less_best[2] > config_result_tuple[2]:
+                    five_best_grasp.remove(less_best)
+                    five_best_grasp.append(config_result_tuple)
+
+        return (five_best_sa, five_best_grasp, five_best_genetic)
+    
+    @property
+    def best_config_time(self) -> (tuple, tuple, tuple):
+        sa_best : tuple = None
+        grasp_best : tuple = None
+        genetic_best : tuple = None
+        
+        for best_result in self.five_best_config_time[0]:
+            if sa_best == None or best_result[2] < sa_best[2]:
+                sa_best = best_result
+
+        for best_result in self.five_best_config_time[1]:
+            if grasp_best == None or best_result[2] < grasp_best[2]:
+                grasp_best = best_result
+        
+        for best_result in self.five_best_config_time[2]:
+            if grasp_best == None or best_result[2] < grasp_best[2]:
+                grasp_best = best_result
+
+        return (sa_best, grasp_best, genetic_best)
+    
+    @property
+    def best_config_sse(self) -> (tuple, tuple, tuple):
+        sa_best : tuple = None
+        grasp_best : tuple = None
+        genetic_best : tuple = None
+        
+        for best_result in self.five_best_config_sse[0]:
+            if sa_best == None or best_result[2] < sa_best[2]:
+                sa_best = best_result
+
+        for best_result in self.five_best_config_sse[1]:
+            if grasp_best == None or best_result[2] < grasp_best[2]:
+                grasp_best = best_result
+        
+        for best_result in self.five_best_config_sse[2]:
+            if grasp_best == None or best_result[2] < grasp_best[2]:
+                grasp_best = best_result
+
+        return (sa_best, grasp_best, genetic_best)
+
+    @property
+    def best_config_zscore(self) -> (tuple, tuple, tuple):
+        sa_best : tuple = None
+        grasp_best : tuple = None
+        genetic_best : tuple = None
+        
+        for best_result in self.five_best_config_zscore[0]:
+            if sa_best == None or best_result[2] < sa_best[2]:
+                sa_best = best_result
+
+        for best_result in self.five_best_config_zscore[1]:
+            if grasp_best == None or best_result[2] < grasp_best[2]:
+                grasp_best = best_result
+        
+        for best_result in self.five_best_config_zscore[2]:
+            if grasp_best == None or best_result[2] < grasp_best[2]:
+                grasp_best = best_result
+
+        return (sa_best, grasp_best, genetic_best)
+
+    @property
+    def method_statistic_data(self) -> (tuple, tuple, tuple):
+        sses_sa : list = list([])
+        sses_grasp : list = list([])
+        sses_genetic : list = list([])
+        z_scores_sa : np.array = None
+        z_scores_grasp : np.array = None
+        z_scores_genetic : np.array = None
+        for sa_result in self._sa_results_list:
+            z_scores_sa = np.contatenate(z_scores_sa, sa_result.z_scores)
+        for grasp_result in self._grasp_results_list:
+            z_scores_grasp = np.contatenate(z_scores_grasp, grasp_result.z_scores)
+        for genetic_result in self._genetic_results_list:
+            z_scores_genetic = np.contatenate(z_scores_genetic, genetic_result.z_scores)
+        sa_data = (np.mean(z_scores_sa), np.std(z_scores_sa))
+        grasp_data = (np.mean(z_scores_grasp), np.std(z_scores_grasp))
+        genetic_data = (np.mean(z_scores_genetic), np.std(z_scores_genetic))
+        return (sa_data, grasp_data, genetic_data)
+
+# The results of training for each metaheuristic applied:
 class TrainingResult:
     def __init__(self, name, avg_sse_list, sse_list, avg_elapsed_list, elapsed_list, z_scores, hyper_param_list, std_list):
         self._method_name : str = name
@@ -76,96 +307,56 @@ class TrainingResult:
         return self._hyper_param_list
     
     # Returning hyperparameter configuration with the best avarage elapsed time:
-    def best_config_time(self):
-        return self._hyper_param_list[self._avg_elapsed_list.index(min(self._avg_elapsed_list))]
+    @property
+    def best_config_time(self) -> tuple:
+        min_time : float = min(self._avg_elapsed_list)
+        return (self._method_name, self._hyper_param_list[self._avg_elapsed_list.index(min_time)], min_time)
     
     # Returing hyperparameter configuration with the best zscore:
     @property
     def best_config_zscore(self):
-        return self._hyper_param_list[np.where(self._z_scores == np.amin(self._z_scores))]
+        min_zscore : float = np.amin(self._z_scores)
+        return (self._method_name, self._hyper_param_list[np.where(self._z_scores == min_zscore)], min_zscore)
     
     # Returning hyperparameter configuration with the best avarage result:
     @property
     def best_config_avg_result(self):
-        return self._hyper_param_list[self._avg_sse_list.index(min(self._avg_sse_list))]
+        min_result : float = min(self._avg_sse_list)
+        return (self._method_name, self._hyper_param_list[self._avg_sse_list.index(min_result)], min_result)
     
     # Returning the metaheuristic's avarage score:
     @property
     def avarage_zscore(self):
         return np.mean(self._z_scores)
-
-    # Getting the five best configurations regarding avarage elapsed time:
-    @property
-    def best_five_config_time(self) -> list:
-        best_configs : list = []
-        best_indeces : list = []
-
-        for i in range(5):
-            min_time : float = np.inf
-            min_index : int = 0
-            config = None
-
-            for j in range(len(self._hyper_param_list)):
-                if self._avg_elapsed_list[j] < min_time and not j in best_indeces:
-                    min_index = j
-                    min_time = self._avg_elapsed_list[j]
-                    config = self._hyper_param_list[j]
-            
-            best_configs.append(config)
-            best_indeces.append(min_index)
-        
-        return best_configs
-    
-    # Getting the five best configurations regarding avarage sse:
-    @property
-    def best_five_config_sse(self) -> list:
-        best_configs : list = []
-        best_indeces : list = []
-
-        for i in range(5):
-            min_sse : float = np.inf
-            min_index : int = 0
-            config = None
-
-            for j in range(len(self._hyper_param_list)):
-                if self._avg_sse_list[j] < min_sse and not j in best_indeces:
-                    min_index = j
-                    min_sse = self._avg_sse_list[j]
-                    config = (self._hyper_param_list[j], min_sse, self.method_name)
-            
-            best_configs.append(config)
-            best_indeces.append(min_index)
-        
-        return best_configs
     
     population_list = property(get_population_list, set_population_list)
 
-def training(problems : dict) -> dict:
-    results : dict = {}
+def training(problems : dict) -> TrainingAnalysis:
+    sa_results_list : list = list([])
+    grasp_results_list : list = list([])
+    genetic_results_list : list = list([])
 
     for problem_name, problem in problems.items():
 
         if problem_name == 'ionosphere':
             continue
-
-        print("Starting the training procedure with the", problem_name, "dataset.")
         
         sa_hyper_params_list = problem['training']['sa']
         sa_result = train_sa(sa_hyper_params_list, problem_name)
+        sa_results_list.append(sa_result)
 
         grasp_hyper_params_list = problem['training']['grasp']
         grasp_result = train_grasp(grasp_hyper_params_list, problem_name)
+        grasp_results_list.append(grasp_result)
 
         genetic_hyper_params_list = problem['training']['genetic']
         genetic_result = train_genetic(genetic_hyper_params_list, problem_name)
+        genetic_results_list.append(genetic_result)
 
-        results[problem_name] = {'sa': sa_result, 'grasp': grasp_result, 'genetic': genetic_result}
-
-    return results
+    training_analysis : TrainingAnalysis = TrainingAnalysis(sa_results_list, grasp_results_list, genetic_results_list)
+    return training_analysis
 
 def train_sa(hyper_param_list: list, problem_name : str) -> TrainingResult:
-
-    print("Training the Simulated Annealing metaheuristic with the", problem_name, "dataset...")
 
     avarage_sse_list : list = []
     sse_lists : list = []
@@ -204,8 +395,6 @@ def train_sa(hyper_param_list: list, problem_name : str) -> TrainingResult:
 
 def train_grasp(hyper_param_list : list, problem_name : str) -> TrainingResult:
 
-    print("Training the GRASP metaheuristic with the", problem_name, "dataset...")
-
     avarage_sse_list : list = []
     sse_lists : list = []
     std_list : list = []
@@ -242,8 +431,6 @@ def train_grasp(hyper_param_list : list, problem_name : str) -> TrainingResult:
     return result
 
 def train_genetic(hyper_param_list : list, problem_name : str) -> TrainingResult:
-
-    print("Training the Genetic Algorithm metaheuristic with the", problem_name, "dataset...")
 
     avarage_sse_list : list = []
     sse_lists : list = []

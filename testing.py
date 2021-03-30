@@ -4,12 +4,12 @@ import scipy as sp
 import numpy as np
 import clustering as clt
 import datasets as ds
+import training as tr
 import math
 import sa
 import grasp
 import genetic
 import kmeans
-import training
 
 '''
 For each problem:
@@ -90,31 +90,31 @@ class TestingResults:
     def avg_zscore(self) -> float:
         return np.mean(self._zscores)
 
-def testing(training_result : dict, problems : dict) -> dict:
+def testing(training_analysis : tr.TrainingAnalysis, problems : dict) -> dict:
     result : dict = dict({})
 
-    for problem_name, problem in problems:
+    for problem_name, problem in problems.items():
         
         result[problem_name] = dict({})
 
         # Testing Simulated Annealing:
         sa_results_list = list([])
         for problem_config in problem['testing']['sa']:
-            sa_results : TestingResults = test_sa(training_result[problem_name]['sa'], problem_config.k, problem_config.data_set)
+            sa_results : TestingResults = test_sa(training_analysis, problem_config.k, problem_config.data_set)
             sa_results_list.append(sa_results)
         result[problem_name]['sa'] = TestingAnalysis(sa_results_list)
         
         # Testing GRASP:
         grasp_results_list = list([])
         for problem_config in problem['testing']['grasp']:
-            grasp_results : TestingResults = test_sa(training_result[problem_name]['grasp'], problem_config.k, problem_config.data_set)
+            grasp_results : TestingResults = test_grasp(training_analysis, problem_config.k, problem_config.data_set)
             grasp_results_list.append(grasp_results)
         result[problem_name]['grasp'] = TestingAnalysis(grasp_results_list)
         
         # Testing Genetic Algorithm:
         genetic_results_list = list([])
         for problem_config in problem['testing']['genetic']:
-            genetic_results : TestingResults = test_sa(training_result[problem_name]['genetic'], problem_config.k, problem_config.data_set)
+            genetic_results : TestingResults = test_genetic(training_analysis, problem_config.k, problem_config.data_set)
             genetic_results_list.append(genetic_results)
         result[problem_name]['genetic'] = TestingAnalysis(genetic_results_list)
         
@@ -127,17 +127,14 @@ def testing(training_result : dict, problems : dict) -> dict:
 
     return result
 
-def test_sa(training : training.TrainingResult, k : int, data_set : np.array) -> TestingResults:
-    best_config_result = training.best_five_config_sse[0]
-
-    print("Testing the Simulated Annealing metaheuristic with k =", k)
+def test_sa(training : tr.TrainingAnalysis, k : int, data_set : np.array) -> TestingResults:
 
     sse_list : list = list([])
     elapsed_list : list = list([])
     avg_sse : float = 0
     avg_elapsed : float = 0
 
-    best_config = training.best_five_config_sse[0]
+    best_config = training.best_config_sse[0][1]
 
     for _ in range(20):
         (result, elapsed) = sa.simulated_annealing(best_config, clt.Clusters(k, data_set))
@@ -152,17 +149,14 @@ def test_sa(training : training.TrainingResult, k : int, data_set : np.array) ->
 
     return TestingResults(sse_list, elapsed_list, avg_sse, avg_elapsed, z_scores)
 
-def test_grasp(training : training.TrainingResult, k : int, data_set : np.array) -> TestingResults:
-    best_config_result = training.best_five_config_sse[0]
-
-    print("Testing the GRASP metaheuristic with k =", k)
+def test_grasp(training : tr.TrainingAnalysis, k : int, data_set : np.array) -> TestingResults:
 
     sse_list : list = list([])
     elapsed_list : list = list([])
     avg_sse : float = 0
     avg_elapsed : float = 0
 
-    best_config = training.best_five_config_sse[0]
+    best_config = training.best_config_sse[1][1]
 
     for _ in range(20):
         (result, elapsed) = grasp.grasp(best_config, clt.Clusters(k, data_set))
@@ -177,17 +171,14 @@ def test_grasp(training : training.TrainingResult, k : int, data_set : np.array)
 
     return TestingResults(sse_list, elapsed_list, avg_sse, avg_elapsed, z_scores)
 
-def test_genetic(training : training.TrainingResult, k : int, data_set : np.array) -> TestingResults:
-    best_config_result = training.best_five_config_sse[0]
-
-    print("Testing the Genetic Algorithm metaheuristic k =", k)
+def test_genetic(training : tr.TrainingAnalysis, k : int, data_set : np.array) -> TestingResults:
 
     sse_list : list = list([])
     elapsed_list : list = list([])
     avg_sse : float = 0
     avg_elapsed : float = 0
 
-    best_config = training.best_five_config_sse[0]
+    best_config = training.best_config_sse[2][1]
 
     for _ in range(20):
         (result, elapsed) = genetic.genetic(best_config, clt.Clusters(k, data_set))
@@ -203,7 +194,6 @@ def test_genetic(training : training.TrainingResult, k : int, data_set : np.arra
     return TestingResults(sse_list, elapsed_list, avg_sse, avg_elapsed, z_scores)
 
 def test_kmeans(k : int, data_set : np.array) -> TestingResults:
-    print("Testing the K-Means algorithm with k =", k)
 
     sse_list : list = list([])
     elapsed_list : list = list([])
