@@ -1,47 +1,69 @@
-Clustering k-médias:
+class MHTraining:
+    method_name : str
 
-Juntar dados em grupos de forma que os pontos estejam próximos entre si. Separar em k grupos usando o centróide do grupo:
+    iris_training : ProblemTraining
+    wine_training : ProblemTraining
 
-centroid = [mean(points, i) for i in 0 .. n - 1] # onde n é a dimensão dos pontos dados
+    five_best_config_time : list<(HyperParam, str, float)>
+    five_best_config_sse : list<(HyperParam, str, float)>
+    five_best_config_zscore : list<(HyperParam, str, float)>
 
-k varia de acordo com a entrada. O objetivo é achar um valor ótimo para k, o que equivale a achar um conjunto ótimo de centróides.
+    best_config_time : (HyperParam, str, float)
+    best_config_sse : (HyperParam, str, float)
+    best_config_zscore : (HyperParam, str, float)
 
-Representação de dados:
+    standard_deviation : float
+    avarage_result : float
 
-Entrada será conjunto de pontos, saída será uma lista de conjunto de pontos.
+class ProblemTraining:
+    problem_name : str
+    
+    hyper_param_list : list<HyperParam>
+    
+    sse_lists : list<list<float>>
+    elapsed_lists : list<list<float>>
+    zscores_list : list<float>
+    
+    avg_sse_list : list<float>
+    avg_elapsed_list : list<float>
 
-Simulated Annealing:
+class Training:
+    sa_training : MHTraining
+    grasp_training : MHTraining
+    genetic_training : MHTraining
 
-Algoritmo usual para clustering:
+    ranking : list<(MHTraining, int)>
 
-# Setting up temperatures:
-t_current = t_init = choose_init_temperature()
-t_final = choose_final_temperature()
-t_eq = temperature_equilibrium_point(t_init, t_final)
-f = monotonically_decrease_temperature_function;
+-------------------------------------------------------------------------
 
-# Setting up problem initial configuration:
-clusters = random_init_cluster_config()
+class MHTesting:
+    method_name : str
 
-while t_current > t_final:
-    while not t_current == t_eq:
-        current_cost = cost(clusters)
-        new_config = disturb(clusters)
-        new_cost = cost(new_config)
-        delta = new_cost - current_cost
-        if delta <= 0:
-            clusters = new_config
-        else
-            clusters = new_config if probability(-delta/t_eq) else clusters
-    t_current = f(t_current)
+    iris_testing : ProblemTesting
+    wine_testing : ProblemTesting
+    ionosphere_testing : ProblemTesting
 
-Precisa definir:
-    -> temperaturas inicial, final e de equilíbrio;
-    -> função de decrescimento monolítico da temperatura;
-    -> criação da configuração inicial dos clusters;
-    -> função de custo;
-    -> função de distúrbio da configuração;
+    standard_mean_sse : float
+    standard_deviation_sse : float
+    standard_mean_time : float
+    standard_deviation_time : float
 
-GRASP:
+    best_config_sse : (HyperParam, str, float)
+    best_config_zscore : (HyperParam, str, float)
 
-Genetic Algorithms:
+class ProblemTesting:
+    problem_name : str
+
+    sse_list : list<float>
+    elapsed_list : list<float>
+    zscores_list : list<float>
+
+    avg_time : float
+    avg_sse : float
+
+class Testing:
+    sa_testing : MHTesting
+    grasp_testing : MHTesting
+    genetic_testing : MHTesting
+
+    ranking : list<(MHTesting, int)>

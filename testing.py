@@ -26,115 +26,203 @@ Paired table with results
 Return best method in general by avarage result and by avarage ranking
 '''
 
-class TestingAnalysis:
-    def __init__(self, results : list):
-        self._results : list = results
-        self._avg_sse : float = 0
-        self._avg_elapsed : float = 0
-        self._avg_deviation : float = 0
-        self._avg_zscore : float = 0
-        for result in results:
-            self._avg_sse += result.avg_sse
-            self._avg_zscore += result.avg_zscore
-        self._avg_sse /= len(results)
-        self._avg_zscore /= len(results)
-        n : int = 0
-        for result in results:
-            for sse in result.sse_list:
-                self._avg_deviation += (sse - self._avg_sse) ** 2
-                n += 1
-        self._avg_deviation /= n
-        self._avg_deviation = math.sqrt(self._avg_deviation)
-    
-    @property
-    def avg_sse(self) -> float:
-        return self._avg_sse
-    
-    @property
-    def avg_elapsed(self) -> float:
-        return self._avg_elapsed
-    
-    @property
-    def avg_deviation(self) -> float:
-        return self._avg_deviation
-
-    @property
-    def testing_results(self) -> list:
-        return self._results
-
-class TestingResults:
-    def __init__(self, sse_list : list, elapsed_list : list, avg_sse : float, avg_elapsed : float, zscores : np.array):
+class ProblemTesting:
+    def __init__(self, sse_list, elapsed_list, zscore_list, problem_name):
+        self._problem_name = problem_name
         self._sse_list = sse_list
         self._elapsed_list = elapsed_list
-        self._avg_sse = avg_sse
-        self._avg_elapsed = avg_elapsed
-        self._zscores = zscores
-    
-    @property
-    def sse_list(self) -> list:
-        return self._sse_list
+        self._zscore_list = zscore_list
+
+        self._avg_time = np.mean(elapsed_list)
+        self._avg_sse = np.mean(sse_list)
 
     @property
-    def avg_sse(self) -> float:
+    def problem_name(self):
+        return self._problem_name
+
+    @property
+    def sse_list(self):
+        return self._sse_list
+    
+    @property
+    def elapsed_list(self):
+        return self._elapsed_list
+    
+    @property
+    def zscore_list(self):
+        return self._zscore_list
+    
+    @property
+    def avg_zscore(self):
+        return np.mean(self._zscore_list)
+    
+    @property
+    def avg_sse(self):
         return self._avg_sse
     
     @property
-    def avg_elapsed(self) -> float:
-        return self.avg_elapsed
+    def avg_time(self):
+        return self._avg_time
     
-    @property
-    def zscores(self) -> float:
-        return self._zscores
-    
-    @property
-    def avg_zscore(self) -> float:
-        return np.mean(self._zscores)
+class MHTesting:
+    def __init__(self, method_name, iris_testing_list, wine_testing_list, ionosphere_testing_list):
+        self._method_name = method_name
+        self._iris_testing_list = iris_testing_list
+        self._wine_testing_list = wine_testing_list
+        self._ionosphere_testing_list = ionosphere_testing_list
 
-def testing(training_analysis : tr.TrainingAnalysis, problems : dict) -> dict:
-    result : dict = dict({})
+        self._sse_data, self._elapsed_data, self._zscores_data = self.calculate_statistics()
+
+        self._avg_sse_list = list([])
+        self._avg_elapsed_list = list([])
+        self._avg_zscore_list = list([])
+
+        for test in self._iris_testing_list:
+            self._avg_sse_list.append(test.avg_sse)
+            self._avg_elapsed_list.append(test.avg_elapsed)
+            self._avg_zscore_list.append(test.avg_zscore)
+        
+        for test in self._wine_testing_list:
+            self._avg_sse_list.append(test.avg_sse)
+            self._avg_elapsed_list.append(test.avg_elapsed)
+            self._avg_zscore_list.append(test.avg_zscore)
+        
+        for test in self._ionosphere_testing_list:
+            self._avg_sse_list.append(test.avg_sse)
+            self._avg_elapsed_list.append(test.avg_elapsed)
+            self._avg_zscore_list.append(test.avg_zscore)
+
+    @property
+    def method_name(self):
+        return self._method_name
+
+    @property
+    def sse_statistics(self):
+        return self._sse_data
+    
+    @property
+    def elapsed_statistics(self):
+        return self._elapsed_data
+    
+    @property
+    def zscores_statistics(self):
+        return self._zscores_data
+
+    @property
+    def avg_sse_list(self):
+        return self._avg_sse_list
+    
+    @property
+    def avg_elapsed_list(self):
+        return self._avg_elapsed_list
+    
+    @property
+    def avg_zscore_list(self):
+        return self._avg_zscore_list
+
+    def calculate_statistics(self):
+        sses = list([])
+        elapsed = list([])
+        zscores = list([])
+
+        for result in self._iris_testing_list:
+            sses += result.sse_list
+            elapsed += result.elapsed_list
+            zscores += result.zscore_list
+        
+        for result in self._wine_testing_list:
+            sses += result.sse_list
+            elapsed += result.elapsed_list
+            zscores += result.zscore_list
+        
+        for result in self._ionosphere_testing_list:
+            sses += result.sse_list
+            elapsed += result.elapsed_list
+            zscores += result.zscore_list
+
+        sse_data = (np.mean(sses), np.std(sses))
+        elapsed_data = (np.mean(elapsed), np.std(elapsed))
+        zscores_data = (np.mean(zscores), np.std(zscores))
+
+        return (sse_data, elapsed_data, zscores_data)
+
+class Testing:
+    def __init__(self, sa_testing, grasp_testing, genetic_testing, kmeans_testing):
+        self._sa_testing = sa_testing
+        self._grasp_testing = grasp_testing
+        self._genetic_testing = genetic_testing
+        self._kmeans_tesing = kmeans_testing
+
+        self._ranking = [self._sa_testing, self._grasp_testing, self._genetic_testing, self._kmeans_tesing]
+        self._ranking.sort(key = lambda x: x.zscores_statistics[0])
+    
+    @property
+    def sa_testing(self):
+        return self._sa_testing
+    
+    @property
+    def grasp_testing(self):
+        return self._grasp_testing
+    
+    @property
+    def genetic_testing(self):
+        return self._genetic_testing
+    
+    @property
+    def kmeans_testing(self):
+        return self._kmeans_tesing
+    
+    @property
+    def ranking(self):
+        return self._ranking
+
+def testing(t : tr.Training, problems : dict) -> Testing:
+    results_lists = dict({})
 
     for problem_name, problem in problems.items():
         
-        result[problem_name] = dict({})
+        sa_results_list = list([])
+        grasp_results_list = list([])
+        genetic_results_list = list([])
+        kmeans_results_list = list([])
 
         # Testing Simulated Annealing:
-        sa_results_list = list([])
         for problem_config in problem['testing']['sa']:
-            sa_results : TestingResults = test_sa(training_analysis, problem_config.k, problem_config.data_set)
+            sa_results : ProblemTesing = test_sa(t, problem_config.k, problem_config.data_set, problem_name)
             sa_results_list.append(sa_results)
-        result[problem_name]['sa'] = TestingAnalysis(sa_results_list)
         
         # Testing GRASP:
-        grasp_results_list = list([])
         for problem_config in problem['testing']['grasp']:
-            grasp_results : TestingResults = test_grasp(training_analysis, problem_config.k, problem_config.data_set)
+            grasp_results : ProblemTesing = test_grasp(t, problem_config.k, problem_config.data_set, problem_name)
             grasp_results_list.append(grasp_results)
-        result[problem_name]['grasp'] = TestingAnalysis(grasp_results_list)
         
         # Testing Genetic Algorithm:
-        genetic_results_list = list([])
         for problem_config in problem['testing']['genetic']:
-            genetic_results : TestingResults = test_genetic(training_analysis, problem_config.k, problem_config.data_set)
+            genetic_results : ProblemTesing = test_genetic(t, problem_config.k, problem_config.data_set, problem_name)
             genetic_results_list.append(genetic_results)
-        result[problem_name]['genetic'] = TestingAnalysis(genetic_results_list)
         
         # Testing K-Means:
-        kmeans_results_list = list([])
         for problem_config in problem['testing']['kmeans']:
-            kmeans_results : TestingResults = test_kmeans(problem_config.k, problem_config.data_set)
+            kmeans_results : ProblemTesing = test_kmeans(problem_config.k, problem_config.data_set, problem_name)
             kmeans_results_list.append(kmeans_results)
-        result[problem_name]['kmeans'] = TestingAnalysis(kmeans_results_list)
 
-    return result
+        results_lists[problem_name] = {'sa': sa_results_list, 'grasp': grasp_results_list, 'genetic': genetic_results_list, 'kmeans': kmeans_results_list}
 
-def test_sa(training : tr.TrainingAnalysis, k : int, data_set : np.array) -> TestingResults:
+    sa_testing = MHTesting(results_lists['iris']['sa'], results_lists['wine']['sa'], results_lists['ionosphere']['sa'])
+    grasp_testing = MHTesting(results_lists['iris']['grasp'], results_lists['wine']['grasp'], results_lists['ionosphere']['grasp'])
+    genetic_testing = MHTesting(results_lists['iris']['genetic'], results_lists['wine']['genetic'], results_lists['ionosphere']['genetic'])
+    kmeans_testing = MHTesting(results_lists['iris']['kmeans'], results_lists['wine']['kmeans'], results_lists['ionosphere']['kmeans'])
+
+    return Testing(sa_testing, grasp_testing, genetic_testing, kmeans_testing)
+
+def test_sa(training : tr.Training, k : int, data_set : np.array, problem_name : str) -> ProblemTesting:
 
     sse_list : list = list([])
     elapsed_list : list = list([])
     avg_sse : float = 0
     avg_elapsed : float = 0
 
-    best_config = training.best_config_sse[0][1]
+    best_config = training.sa_training.best_config_zscore
 
     for _ in range(20):
         (result, elapsed) = sa.simulated_annealing(best_config, clt.Clusters(k, data_set))
@@ -147,16 +235,16 @@ def test_sa(training : tr.TrainingAnalysis, k : int, data_set : np.array) -> Tes
     avg_elapsed /= 20
     z_scores : np.array = sp.stats.zscore(sse_list)
 
-    return TestingResults(sse_list, elapsed_list, avg_sse, avg_elapsed, z_scores)
+    return ProblemTesting(sse_list, elapsed_list, z_scores, problem_name)
 
-def test_grasp(training : tr.TrainingAnalysis, k : int, data_set : np.array) -> TestingResults:
+def test_grasp(training : tr.Training, k : int, data_set : np.array, problem_name : str) -> ProblemTesting:
 
     sse_list : list = list([])
     elapsed_list : list = list([])
     avg_sse : float = 0
     avg_elapsed : float = 0
 
-    best_config = training.best_config_sse[1][1]
+    best_config = training.grasp_training.best_config_zscore
 
     for _ in range(20):
         (result, elapsed) = grasp.grasp(best_config, clt.Clusters(k, data_set))
@@ -169,18 +257,18 @@ def test_grasp(training : tr.TrainingAnalysis, k : int, data_set : np.array) -> 
     avg_elapsed /= 20
     z_scores : np.array = sp.stats.zscore(sse_list)
 
-    return TestingResults(sse_list, elapsed_list, avg_sse, avg_elapsed, z_scores)
+    return ProblemTesting(sse_list, elapsed_list, z_scores, problem_name)
 
-def test_genetic(training : tr.TrainingAnalysis, k : int, data_set : np.array) -> TestingResults:
+def test_genetic(training : tr.Training, k : int, data_set : np.array, problem_name : str) -> ProblemTesting:
 
     sse_list : list = list([])
     elapsed_list : list = list([])
     avg_sse : float = 0
     avg_elapsed : float = 0
 
-    best_config = training.best_config_sse[2][1]
+    best_config = training.genetic_training.best_config_zscore
 
-    for _ in range(20):
+    for i in range(20):
         (result, elapsed) = genetic.genetic(best_config, clt.Clusters(k, data_set))
         avg_sse += result
         avg_elapsed += elapsed
@@ -191,9 +279,9 @@ def test_genetic(training : tr.TrainingAnalysis, k : int, data_set : np.array) -
     avg_elapsed /= 20
     z_scores : np.array = sp.stats.zscore(sse_list)
 
-    return TestingResults(sse_list, elapsed_list, avg_sse, avg_elapsed, z_scores)
+    return ProblemTesting(sse_list, elapsed_list, z_scores, problem_name)
 
-def test_kmeans(k : int, data_set : np.array) -> TestingResults:
+def test_kmeans(k : int, data_set : np.array, problem_name : str) -> ProblemTesting:
 
     sse_list : list = list([])
     elapsed_list : list = list([])
@@ -211,4 +299,4 @@ def test_kmeans(k : int, data_set : np.array) -> TestingResults:
     avg_elapsed /= 20
     z_scores : np.array = sp.stats.zscore(sse_list)
 
-    return TestingResults(sse_list, elapsed_list, avg_sse, avg_elapsed, z_scores)
+    return ProblemTesting(sse_list, elapsed_list, z_scores, problem_name)
