@@ -29,7 +29,7 @@ class TrainingResult:
         max_data_result : TrainingData = max(training_data_list, key = lambda item : item.avg_result)
 
         self.__best_config_time = (max_data_time.config, max_data_time.avg_time)
-        self.__best_config_zscore = (max_data_result.config, max_data_result.avg_result)
+        self.__best_config_zscore = (max_data_result.config, max_data_result.avg_zscore)
 
         self.__five_best_times = [(x.config, x.avg_time) for x in heapq.nsmallest(5, training_data_list, key = lambda item : item.avg_time)]
         self.__five_best_results = [(x.config, x.avg_result) for x in heapq.nsmallest(5, training_data_list, key = lambda item : item.avg_result)]

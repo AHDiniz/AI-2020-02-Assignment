@@ -58,15 +58,14 @@ class TestingResults:
     def standard_deviation(self):
         return self.__standard
 
-def testing(meta_heuristic, dataset : ds.Dataset, training_result : tr.TrainingResult, method_name : str, dataset_name : str) -> TestingResults:
+def testing(meta_heuristic, dataset : ds.Dataset, hyper_param, method_name : str, dataset_name : str) -> TestingResults:
     results = []
     times = []
     for k in dataset.testing_ks:
-        config = training_result.best_config_zscore
         for _ in range(20):
             clusters = clt.Clusters(k, dataset.points_data)
-            result, time = meta_heuristic(config, clusters)
-            result.append(result)
+            result, time = meta_heuristic(hyper_param, clusters)
+            results.append(result)
             times.append(time)
     return TestingResults(results, times, method_name, dataset_name)
 

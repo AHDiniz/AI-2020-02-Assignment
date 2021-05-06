@@ -87,12 +87,23 @@ for dataset_name, dataset in datasets.items():
         for method_name, method in methods.items():
             training_results[dataset_name][method_name] = tr.training(method, dataset, hyper_params[method_name], method_name, dataset_name)
 
+hyper_params = gr.best_config_by_result(training_results)
+gr.training_five_best_configuration(training_results)
+gr.training_avarage_ranking(training_results)
+gr.training_results_boxplots(training_results)
+gr.training_times_boxplots(training_results)
+gr.best_config_by_time(training_results)
+
 testing_results = {
-    'Iris': {'SA': None, 'GRASP': None, 'Genetic': None},
-    'Wine': {'SA': None, 'GRASP': None, 'Genetic': None},
-    'Ionosphere': {'SA': None, 'GRASP': None, 'Genetic': None}
+    'Iris': {'SA': None, 'GRASP': None, 'Genetic': None, 'k-Means': None},
+    'Wine': {'SA': None, 'GRASP': None, 'Genetic': None, 'k-Means': None},
+    'Ionosphere': {'SA': None, 'GRASP': None, 'Genetic': None, 'k-Means': None}
 }
 
 for dataset_name, dataset in datasets.items():
     for method_name, method in methods.items():
-        testing_results[dataset_name][method_name] = ts.testing(method, dataset, training_results[dataset_name][method_name], method_name, dataset_name)
+        if method_name == 'k-Means':
+            testing_results[dataset_name][method_name] = ts.test_kmeans(dataset, dataset_name)
+        else:
+            testing_results[dataset_name][method_name] = ts.testing(method, dataset, hyper_params[method_name], method_name, dataset_name)
+
