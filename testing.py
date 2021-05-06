@@ -5,6 +5,7 @@ import numpy as np
 import clustering as clt
 import datasets as ds
 import training as tr
+import kmeans
 
 '''
 For each problem:
@@ -57,7 +58,7 @@ class TestingResults:
     def standard_deviation(self):
         return self.__standard
 
-def testing(meta_heuristic : function, dataset : ds.Dataset, training_result : tr.TrainingResult, method_name : str, dataset_name : str) -> TestingResults:
+def testing(meta_heuristic, dataset : ds.Dataset, training_result : tr.TrainingResult, method_name : str, dataset_name : str) -> TestingResults:
     results = []
     times = []
     for k in dataset.testing_ks:

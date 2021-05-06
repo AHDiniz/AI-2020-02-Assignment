@@ -38,3 +38,5 @@ def load_datasets() -> dict:
     ionosphere_data = np.delete(ionosphere_data, ionosphere_data.shape[1] - 1, 1)
 
     result['Ionosphere'] = Dataset(ionosphere_data, None, [2,3,5,10,15,20,25,30,40,50])
+
+    return result
